@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>G-code: траектория</title>
+<style>
+:root{--bg:#fff;--fg:#1a1a18;--mut:#6b6a64;--bd:#d6d4cc;--sf:#f4f3ee;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1c1a;--fg:#ecebe5;--mut:#a3a199;--bd:#3a3935;--sf:#262624}}
+:root[data-theme="dark"]{--bg:#1c1c1a;--fg:#ecebe5;--mut:#a3a199;--bd:#3a3935;--sf:#262624}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{padding:12px;max-width:900px;margin:0 auto}
+textarea{width:100%;box-sizing:border-box;height:170px;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;background:var(--sf);color:var(--fg);border:1px solid var(--bd);border-radius:8px;padding:8px;resize:vertical}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+button,label.b{font:inherit;background:var(--sf);color:var(--fg);border:1px solid var(--bd);border-radius:8px;padding:8px 12px;cursor:pointer}
+button.p{background:#1D9E75;color:#fff;border-color:#1D9E75}
+canvas{display:block;width:100%;height:55vh;min-height:300px;background:var(--sf);border:1px solid var(--bd);border-radius:8px;touch-action:none}
+input[type=range]{width:100%;margin:10px 0}
+.s{font-size:13px;color:var(--mut)}
+#er{font-size:13px;color:#D85A30}
+</style></head><body><main>
+<textarea id="src" spellcheck="false" placeholder="Вставьте G-код сюда или нажмите «Открыть файл»"></textarea>
+<div class="row">
+<button class="p" id="go">Показать</button>
+<label class="b">Открыть файл<input type="file" id="fl" hidden></label>
+<button id="sv">Сохранить .nc</button>
+<button id="cl">Очистить</button>
+</div>
+<div class="row"><button id="vt">Сверху</button><button id="vi">Объём</button><button id="vf">Вписать</button></div>
+<div class="s">
+<label><input type="checkbox" id="dpi" checked> целое число без точки = мм (параметр 3401 DPI=1)</label><br>
+<label><input type="checkbox" id="lin"> G0 по прямой (параметр 1401 LRP=1), иначе оси едут независимо</label>
+</div>
+<div id="er"></div>
+<div class="s" id="wn"></div>
+<div class="s" id="ms"></div>
+<canvas id="cv"></canvas>
+<input type="range" id="sl" min="0" max="0" value="0">
+<div class="s" id="st"></div>
+<div class="s" style="margin-top:6px"><span style="color:#1D9E75">■</span> рабочая подача &nbsp;<span style="color:#378ADD">■</span> быстрый ход &nbsp;<span style="color:#D85A30">●</span> инструмент. Читает как стойка: G0–G3 (G17), G90/G91, макро Fanuc (#, IF, WHILE, GOTO), останов на M30/M2, тревоги по радиусу дуги и #3000. Не рисует: G41/G42, циклы, подпрограммы, G18/G19. Координаты в системе программы (смещения G54 и коррекции не учитываются).</div>
+</main>
+<script>
+var $=function(i){return document.getElementById(i)};
+var pts=[],idx=0,yaw=-0.6,pit=0.6,zm=1,px=0,py=0,m3=true,bb=null;
+function mb(s,i){var d=0;for(var j=i;j<s.length;j++){if(s[j]==='[')d++;else if(s[j]===']'){d--;if(d===0)return j}}return s.length-1}
+function words(s){var o=[],i=0;while(i<s.length){var c=s[i++];if(!/[A-Z]/.test(c))continue;var j=i;if(s[j]==='-'||s[j]==='+')j++;if(s[j]==='['){j=mb(s,j)+1}else if(s[j]==='#'){j++;while(/\d/.test(s[j]||''))j++}else{while(/[\d.]/.test(s[j]||''))j++}o.push([c,s.slice(i,j)]);i=j}return o}
+function run(src){
+var err='',V={},raw=[],msg=[],num=[],warn={},nPt=0;
+src.split('\n').forEach(function(l,i){var m=(l.match(/\(([^)]*)\)/)||[])[1]||'',s=l.replace(/\([^)]*\)/g,'').replace(/\s+/g,'').toUpperCase().replace(/^\//,'');if(s&&s!=='%'){raw.push(s);msg.push(m);num.push(i+1)}});
+var lab={};raw.forEach(function(s,i){var m=s.match(/^N(\d+)/);if(m)lab[+m[1]]=i});
+var L=raw.map(function(s){return s.replace(/^N\d+/,'')});
+var g=function(n){return V[n]||0};
+var F={SIN:function(a){return Math.sin(a*Math.PI/180)},COS:function(a){return Math.cos(a*Math.PI/180)},TAN:function(a){return Math.tan(a*Math.PI/180)},SQRT:Math.sqrt,ABS:Math.abs,ROUND:Math.round,FIX:Math.floor,FUP:Math.ceil};
+var cmp={GE:'>=',GT:'>',LE:'<=',LT:'<',EQ:'==',NE:'!='};
+function ev(e){e=e.replace(/\[/g,'(').replace(/\]/g,')').replace(/#(\d+)/g,'g($1)').replace(/GE|GT|LE|LT|EQ|NE/g,function(k){return cmp[k]});return +(new Function('g','SIN','COS','TAN','SQRT','ABS','ROUND','FIX','FUP','return ('+e+')'))(g,F.SIN,F.COS,F.TAN,F.SQRT,F.ABS,F.ROUND,F.FIX,F.FUP)}
+var pc=0,x=0,y=0,z=0,abs=true,mode=0,steps=0,P=[{x:0,y:0,z:0,r:1}];
+function rap(a,b,c){
+if($('lin').checked){P.push({x:a,y:b,z:c,r:1});return}
+var p=[x,y,z],t=[a,b,c],r=[0,1,2].map(function(i){return Math.abs(t[i]-p[i])}),sg=[0,1,2].map(function(i){return t[i]>=p[i]?1:-1}),n=0;
+while(true){var act=[0,1,2].filter(function(i){return r[i]>1e-9});if(!act.length)break;var m=Math.min.apply(null,act.map(function(i){return r[i]}));act.forEach(function(i){p[i]+=sg[i]*m;r[i]-=m});P.push({x:p[0],y:p[1],z:p[2],r:1});n++}
+if(n){var q=P[P.length-1];q.x=a;q.y=b;q.z=c}}
+function asg(s,k){var m=s.match(/^#(\d+)=(.+)$/);if(!m)return false;var v=ev(m[2]);if(+m[1]===3000){err='Макро-тревога 3000'+(msg[k]?': '+msg[k]:'')+' (значение '+v+', строка '+num[k]+')';pc=1e9}else V[+m[1]]=v;return true}
+try{
+while(pc<L.length&&steps++<400000){
+var s=L[pc++],k=pc-1;if(!s||/^O\d+$/.test(s))continue;
+if(s[0]==='#'){asg(s,k);continue}
+if(s.indexOf('IF[')===0){var e=mb(s,2),rest=s.slice(e+1);if(ev(s.slice(2,e+1))){if(rest.indexOf('THEN')===0)asg(rest.slice(4),k);else if(rest.indexOf('GOTO')===0){var t=lab[ev(rest.slice(4))];if(t===undefined){err='Нет метки, строка '+num[k];break}pc=t}}continue}
+if(s.indexOf('WHILE[')===0){var e2=mb(s,5),dn=s.slice(e2+1).replace('DO','');if(!ev(s.slice(5,e2+1))){var j=pc;while(j<L.length&&L[j]!=='END'+dn)j++;pc=j+1}continue}
+var me=s.match(/^END(\d+)$/);if(me){var q=pc-2;while(q>=0&&!(L[q].indexOf('WHILE[')===0&&L[q].slice(-(me[1].length+2))==='DO'+me[1]))q--;if(q<0){err='END без WHILE, строка '+num[k];break}pc=q;continue}
+if(s.indexOf('GOTO')===0){var t2=lab[ev(s.slice(4))];if(t2===undefined){err='Нет метки, строка '+num[k];break}pc=t2;continue}
+var w={},skip=false,fin=false;
+words(s).forEach(function(a){var c=a[0],v=a[1];
+if(c==='G'){var n=ev(v);if(n===0||n===1||n===2||n===3)mode=n;else if(n===90)abs=true;else if(n===91)abs=false;else if(n===28||n===30||n===53||n===4)skip=true;else if(n===41||n===42)warn['G41/G42 не учитываются, путь показан как в программе']=1;else if(n>=81&&n<=89)warn['Циклы G81–G89 не рисуются']=1;else if(n===18||n===19)warn['G18/G19 не поддерживаются']=1}
+else if(c==='M'){var m=ev(v);if(m===30||m===2)fin=true;else if(m===98)warn['M98: подпрограммы не выполняются']=1}
+else if('XYZIJR'.indexOf(c)>=0&&v){if(/^[-+]?#\d+$/.test(v)&&V[+v.replace(/[-+#]/g,'')]===undefined)return;var val=ev(v);if(/^[-+]?\d+$/.test(v)){nPt++;if(!$('dpi').checked)val/=1000}w[c]=val}});
+if(skip){if(fin)break;continue}
+var has=w.X!==undefined||w.Y!==undefined||w.Z!==undefined;
+var nx=w.X!==undefined?(abs?w.X:x+w.X):x,ny=w.Y!==undefined?(abs?w.Y:y+w.Y):y,nz=w.Z!==undefined?(abs?w.Z:z+w.Z):z;
+if(mode<2){if(has){if(mode===0)rap(nx,ny,nz);else P.push({x:nx,y:ny,z:nz,r:0});x=nx;y=ny;z=nz}}
+else if(has||w.I!==undefined||w.J!==undefined||w.R!==undefined){
+var cx,cy;
+if(w.R!==undefined){var dx=nx-x,dy=ny-y,d=Math.hypot(dx,dy);if(d<1e-9||Math.abs(w.R)<d/2-1e-6){err='Тревога P/S 023: неверный радиус R, строка '+num[k];break}var h=Math.sqrt(Math.max(0,w.R*w.R-d*d/4)),sg=(mode===3?1:-1)*(w.R>0?1:-1);cx=(x+nx)/2-sg*h*dy/d;cy=(y+ny)/2+sg*h*dx/d}
+else{cx=x+(w.I||0);cy=y+(w.J||0);var dr=Math.abs(Math.hypot(x-cx,y-cy)-Math.hypot(nx-cx,ny-cy));if(dr>0.01){err='Тревога P/S 020: разность радиусов дуги '+dr.toFixed(3)+' мм, строка '+num[k];break}}
+var a0=Math.atan2(y-cy,x-cx),a1=Math.atan2(ny-cy,nx-cx),sw=a1-a0,TP=2*Math.PI;
+if(mode===3){while(sw<=1e-9)sw+=TP}else{while(sw>=-1e-9)sw-=TP}
+var r0=Math.hypot(x-cx,y-cy),r1=Math.hypot(nx-cx,ny-cy),n2=Math.max(2,Math.ceil(Math.abs(sw)/0.05));
+for(var i=1;i<=n2;i++){var tt=i/n2,aa=a0+sw*tt,rr=r0+(r1-r0)*tt;P.push({x:cx+rr*Math.cos(aa),y:cy+rr*Math.sin(aa),z:z+(nz-z)*tt,r:0})}
+P[P.length-1].x=nx;P[P.length-1].y=ny;x=nx;y=ny;z=nz}
+if(fin)break}
+}catch(ex){err='Ошибка в строке '+num[Math.max(0,pc-1)]+': '+ex.message}
+if(steps>=400000)err='Слишком много шагов (возможен бесконечный цикл)';
+if(nPt)warn['Значений без точки: '+nPt+' (X10 = 10 мм при DPI=1 и 0.010 мм при DPI=0)']=1;
+$('er').textContent=err;$('wn').textContent=Object.keys(warn).join(' · ');
+pts=P;idx=P.length-1;$('sl').max=idx;$('sl').value=idx;
+var mn=[1e9,1e9,1e9],mx=[-1e9,-1e9,-1e9],cut=0,rap_=0;
+for(var u=0;u<P.length;u++){var p=P[u];mn=[Math.min(mn[0],p.x),Math.min(mn[1],p.y),Math.min(mn[2],p.z)];mx=[Math.max(mx[0],p.x),Math.max(mx[1],p.y),Math.max(mx[2],p.z)];if(u){var l=Math.hypot(p.x-P[u-1].x,p.y-P[u-1].y,p.z-P[u-1].z);if(p.r)rap_+=l;else cut+=l}}
+bb={c:[(mn[0]+mx[0])/2,(mn[1]+mx[1])/2,(mn[2]+mx[2])/2],r:Math.max(1e-3,Math.hypot(mx[0]-mn[0],mx[1]-mn[1],mx[2]-mn[2])/2),mn:mn,mx:mx,cut:cut,rap:rap_};
+draw()}
+function draw(){
+var cv=$('cv'),dpr=window.devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;cv.width=W*dpr;cv.height=H*dpr;
+var c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,W,H);
+if(!bb||pts.length<2){return}
+var s=0.46*Math.min(W,H)/bb.r*zm,cy_=Math.cos(yaw),sy_=Math.sin(yaw),cp=Math.cos(pit),sp=Math.sin(pit);
+function pj(x,y,z){var X=x-bb.c[0],Y=y-bb.c[1],Z=z-bb.c[2],a=X*cy_-Y*sy_,b=X*sy_+Y*cy_;return [W/2+px+a*s,H/2+py-(b*sp+Z*cp)*s]}
+var ax=bb.r*0.25,o=pj(0,0,0);
+[[ax,0,0,'X','#D85A30'],[0,ax,0,'Y','#1D9E75'],[0,0,ax,'Z','#378ADD']].forEach(function(a){var e=pj(a[0],a[1],a[2]);c.strokeStyle=a[4];c.lineWidth=1.5;c.beginPath();c.moveTo(o[0],o[1]);c.lineTo(e[0],e[1]);c.stroke();c.fillStyle=a[4];c.font='12px sans-serif';c.fillText(a[3],e[0]+3,e[1]-3)});
+var cats=[[1,1,'#378ADD',1,[]],[1,0,'rgba(55,138,221,.3)',1,[]],[0,1,'#1D9E75',2,[]],[0,0,'rgba(29,158,117,.3)',2,[]]];
+var prev=pj(pts[0].x,pts[0].y,pts[0].z);
+for(var i=1;i<pts.length;i++){var p=pts[i],cur=pj(p.x,p.y,p.z),done=i<=idx?1:0;var ci=(p.r?0:2)+(done?0:1);cats[ci][4].push(prev[0],prev[1],cur[0],cur[1]);prev=cur}
+cats.forEach(function(k){c.strokeStyle=k[2];c.lineWidth=k[3];c.lineJoin='round';c.beginPath();var a=k[4];for(var j=0;j<a.length;j+=4){c.moveTo(a[j],a[j+1]);c.lineTo(a[j+2],a[j+3])}c.stroke()});
+var t=pts[idx],tp=pj(t.x,t.y,t.z);c.fillStyle='#D85A30';c.beginPath();c.arc(tp[0],tp[1],5,0,7);c.fill();
+$('st').textContent='Точек: '+pts.length+' · рез: '+bb.cut.toFixed(1)+' мм · холостой: '+bb.rap.toFixed(1)+' мм · X '+bb.mn[0].toFixed(1)+'…'+bb.mx[0].toFixed(1)+' · Y '+bb.mn[1].toFixed(1)+'…'+bb.mx[1].toFixed(1)+' · Z '+bb.mn[2].toFixed(1)+'…'+bb.mx[2].toFixed(1)+' · инструмент: X'+t.x.toFixed(2)+' Y'+t.y.toFixed(2)+' Z'+t.z.toFixed(2)}
+function view(top){m3=!top;yaw=top?0:-0.6;pit=top?Math.PI/2:0.6;zm=1;px=0;py=0;draw()}
+function ms(t){$('ms').textContent=t}
+$('go').onclick=function(){run($('src').value)};
+$('dpi').onchange=$('lin').onchange=function(){run($('src').value)};
+$('cl').onclick=function(){$('src').value='';pts=[];bb=null;idx=0;$('sl').max=0;$('sl').value=0;['er','wn','ms','st'].forEach(function(i){$(i).textContent=''});draw()};
+$('sv').onclick=function(){var t=$('src').value;if(!t.trim()){ms('Нет кода для сохранения');return}
+var m=t.match(/O\s*(\d+)/i),nm=m?'O'+m[1]:'program';
+if(window.claude&&window.claude.use){window.claude.use('downloads').then(function(d){if(!d){ms('Сохранение здесь недоступно: скачайте html-файл и откройте его локально');return}return d.save({filename:nm+'.txt',data:t}).then(function(){ms('Сохранено как '+nm+'.txt, переименуйте в .nc')})}).catch(function(e){ms(e&&e.code==='declined'?'Сохранение отменено':'Не удалось сохранить')})}
+else if(window.Android&&Android.save){Android.save(nm+'.nc',t);ms('Выберите, куда сохранить '+nm+'.nc')}else{var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'}));a.download=nm+'.nc';document.body.appendChild(a);a.click();a.remove();ms('Сохранено: '+nm+'.nc')}};
+$('vt').onclick=function(){view(true)};$('vi').onclick=function(){view(false)};$('vf').onclick=function(){zm=1;px=0;py=0;draw()};
+$('sl').oninput=function(){idx=+this.value;draw()};
+$('fl').onchange=function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){$('src').value=r.result;run(r.result);view(false)};r.readAsText(f)};
+var ptr=new Map(),ld=0;
+function pd(){var a=Array.from(ptr.values());return a.length<2?0:Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1])}
+var cv=$('cv');
+cv.onpointerdown=function(e){cv.setPointerCapture(e.pointerId);ptr.set(e.pointerId,[e.clientX,e.clientY]);ld=pd()};
+cv.onpointermove=function(e){if(!ptr.has(e.pointerId))return;var o=ptr.get(e.pointerId),dx=e.clientX-o[0],dy=e.clientY-o[1];
+if(ptr.size===1){if(m3){yaw+=dx*0.01;pit=Math.min(1.5,Math.max(-0.3,pit+dy*0.01))}else{px+=dx;py+=dy}}
+else{px+=dx/2;py+=dy/2}
+ptr.set(e.pointerId,[e.clientX,e.clientY]);if(ptr.size===2){var d=pd();if(ld)zm=Math.max(0.2,Math.min(60,zm*d/ld));ld=d}draw()};
+cv.onpointerup=cv.onpointercancel=function(e){ptr.delete(e.pointerId);ld=0};
+cv.addEventListener('wheel',function(e){e.preventDefault();zm=Math.max(0.2,Math.min(60,zm*(e.deltaY<0?1.1:0.9)));draw()},{passive:false});
+window.addEventListener('resize',draw);
+</script></body></html>
