@@ -207,6 +207,7 @@ button:not(.p):not(.on):hover,label.b:hover{border-color:var(--mut)}
 <section id="t5" hidden>
 <div class="cd"><button class="p wide" id="lbFromT" data-i="save" style="margin:0">Сохранить из «Траектории»</button><label class="f"><span>Поиск</span><input id="lbQ"></label><div class="s" id="lbMsg"></div></div>
 <div id="lbList"></div>
+<div class="cd"><div class="h">О программе</div><div class="s" id="upVer"></div><div class="row" style="margin:0"><button id="upChk" data-i="check">Проверить обновления</button><button class="p" id="upGet" data-i="save" hidden>Обновить</button></div><div class="s" id="upMsg"></div></div>
 </section>
 </main>
 <script>
@@ -1251,6 +1252,24 @@ window.MODELAPI.importObj=importObj;window.MODELAPI.exportObj=exportObj;
 window.partCenter=function(D){var CH=chainsAbs(D||[]).filter(function(c){return c.closed}),big=null,ba=0;CH.forEach(function(c){var a=Math.abs(area(c.els));if(a>ba){ba=a;big=c}});var b=null;if(big)b=bbox(big.els);else{var pts=[];(D||[]).forEach(function(o){if(o.t==='l'){pts.push(o.a,o.b)}else if(o.t==='c'){pts.push([o.c[0]-o.r,o.c[1]-o.r],[o.c[0]+o.r,o.c[1]+o.r])}});if(!pts.length)return null;b=[Math.min.apply(0,pts.map(function(p){return p[0]})),Math.min.apply(0,pts.map(function(p){return p[1]})),Math.max.apply(0,pts.map(function(p){return p[0]})),Math.max.apply(0,pts.map(function(p){return p[1]}))]}return [+((b[0]+b[2])/2).toFixed(4),+((b[1]+b[3])/2).toFixed(4)]};
 if(window.cadAutoZero)window.cadAutoZero();
 
+})();
+(function(){
+var API='https://api.github.com/repos/Etoneyaeslichto/gcode-viewer/releases/latest',REL='https://github.com/Etoneyaeslichto/gcode-viewer/releases/latest';
+var A=window.Android,win=!!(window.chrome&&window.chrome.webview);
+function ver(s){var m=String(s||'').match(/(\d+)\.(\d+)\.(\d+)/);return m?[+m[1],+m[2],+m[3]]:null}
+function newer(a,b){for(var i=0;i<3;i++){if(a[i]!==b[i])return a[i]>b[i]}return false}
+var cur=null;try{cur=A&&A.getVersion?ver(A.getVersion()):null}catch(e){}
+$('upVer').textContent=cur?'Версия '+cur.join('.'):'Версия неизвестна';
+function open(u){if(A&&A.openUrl)A.openUrl(u);else window.open(u,'_blank')}
+$('upChk').onclick=function(){var b=this,m=$('upMsg'),g=$('upGet');g.hidden=true;b.disabled=true;m.textContent='Проверяю…';
+fetch(API,{headers:{Accept:'application/vnd.github+json'}}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){
+var nv=ver(j.tag_name);if(!nv)throw 0;
+if(cur&&!newer(nv,cur)){m.textContent='Установлена последняя версия';return}
+var ext=win?'.exe':'.apk',a=(j.assets||[]).filter(function(x){return x.name.slice(-4)===ext})[0],self=!!(A&&A.installUpdate&&a);
+m.textContent='Доступна версия '+nv.join('.')+'. Чертёж и настройки сохранятся.';
+g.hidden=false;g.onclick=function(){if(!self){open(A&&a?a.browser_download_url:REL);return}g.disabled=b.disabled=true;m.textContent='Скачиваю…';A.installUpdate(a.browser_download_url)}
+}).catch(function(){m.textContent='Не удалось проверить: нет интернета или GitHub недоступен'}).then(function(){b.disabled=false})};
+window.updProgress=function(s,v){var m=$('upMsg');if(s==='p')m.textContent='Скачиваю… '+v+'%';else if(s==='i'){m.textContent=v;$('upGet').disabled=$('upChk').disabled=false}else{m.textContent='Ошибка обновления: '+v;$('upGet').disabled=$('upChk').disabled=false}};
 })();
 </script>
 </body></html>

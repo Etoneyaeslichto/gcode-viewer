@@ -2,9 +2,13 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
@@ -13,11 +17,61 @@ namespace GcodeViewer
 {
     static class Program
     {
+        public static readonly string UpdateDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GcodeViewer", "update");
+
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
             ApplicationConfiguration.Initialize();
+            // Копия программы как установщик: дождаться закрытия, заменить файл скачанным и запустить
+            if (args.Length == 4 && args[0] == "--replace")
+            {
+                Replace(args[1], args[2], args[3]);
+                return;
+            }
+            try
+            {
+                if (Directory.Exists(UpdateDir))
+                {
+                    Directory.Delete(UpdateDir, true);
+                }
+            }
+            catch
+            {
+            }
             Application.Run(new MainForm());
+        }
+
+        private static void Replace(string target, string pid, string source)
+        {
+            try
+            {
+                Process.GetProcessById(int.Parse(pid)).WaitForExit(20000);
+            }
+            catch
+            {
+            }
+            for (int i = 0; ; i++)
+            {
+                try
+                {
+                    File.Copy(source, target, true);
+                    break;
+                }
+                catch (Exception e)
+                {
+                    if (i >= 20)
+                    {
+                        MessageBox.Show("Не удалось заменить файл программы:\n" + e.Message +
+                            "\n\nНовая версия сохранена здесь:\n" + source, "G-код ЧПУ",
+                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                    Thread.Sleep(500);
+                }
+            }
+            Process.Start(new ProcessStartInfo(target) { UseShellExecute = true });
         }
     }
 
@@ -94,9 +148,11 @@ namespace GcodeViewer
             };
 
             // Страница уже умеет сохранять через window.Android.saveFile (как в APK)
-            core.AddHostObjectToScript("bridge", new Bridge());
+            core.AddHostObjectToScript("bridge", new Bridge(this));
             await core.AddScriptToExecuteOnDocumentCreatedAsync(
-                "window.Android={saveFile:function(n,t){return chrome.webview.hostObjects.sync.bridge.SaveFile(n,t)}};");
+                "(function(b){window.Android={saveFile:function(n,t){return b.SaveFile(n,t)}," +
+                "getVersion:function(){return b.GetVersion()},openUrl:function(u){b.OpenUrl(u)}," +
+                "installUpdate:function(u){b.InstallUpdate(u)}}})(chrome.webview.hostObjects.sync.bridge);");
 
             core.Navigate(Host + "index.html");
         }
@@ -127,6 +183,37 @@ namespace GcodeViewer
             }
         }
 
+        // Состояние обновления для страницы: p — проценты, i — сообщение, err — ошибка
+        internal void Report(string state, string value)
+        {
+            string js = "window.updProgress&&updProgress(" + JsonSerializer.Serialize(state) + "," +
+                JsonSerializer.Serialize(value) + ")";
+            BeginInvoke(() => web.CoreWebView2?.ExecuteScriptAsync(js));
+        }
+
+        internal void RestartInto(string exe)
+        {
+            BeginInvoke(() =>
+            {
+                try
+                {
+                    string updater = Path.Combine(Program.UpdateDir, "updater.exe");
+                    File.Copy(Environment.ProcessPath, updater, true);
+                    var psi = new ProcessStartInfo(updater) { UseShellExecute = false };
+                    psi.ArgumentList.Add("--replace");
+                    psi.ArgumentList.Add(Environment.ProcessPath);
+                    psi.ArgumentList.Add(Environment.ProcessId.ToString());
+                    psi.ArgumentList.Add(exe);
+                    Process.Start(psi);
+                    Close();
+                }
+                catch (Exception e)
+                {
+                    Report("err", e.Message);
+                }
+            });
+        }
+
         private static void OpenExternal(string url)
         {
             try
@@ -144,6 +231,78 @@ namespace GcodeViewer
     public class Bridge
     {
         private const string Subdir = "CNC";
+
+        private readonly MainForm form;
+        private bool busy;
+
+        internal Bridge(MainForm form)
+        {
+            this.form = form;
+        }
+
+        public void InstallUpdate(string url)
+        {
+            if (busy || url == null || !url.StartsWith("https://"))
+            {
+                return;
+            }
+            busy = true;
+            Task.Run(async () =>
+            {
+                try
+                {
+                    Directory.CreateDirectory(Program.UpdateDir);
+                    string exe = Path.Combine(Program.UpdateDir, "GcodeViewer.exe");
+                    using (var http = new HttpClient())
+                    {
+                        http.DefaultRequestHeaders.UserAgent.ParseAdd("GcodeViewer");
+                        using var resp = await http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                        resp.EnsureSuccessStatusCode();
+                        long total = resp.Content.Headers.ContentLength ?? 0, done = 0;
+                        int last = -1;
+                        using var src = await resp.Content.ReadAsStreamAsync();
+                        using var dst = File.Create(exe);
+                        var buf = new byte[81920];
+                        int n;
+                        while ((n = await src.ReadAsync(buf)) > 0)
+                        {
+                            await dst.WriteAsync(buf.AsMemory(0, n));
+                            done += n;
+                            int pct = total > 0 ? (int)(done * 100 / total) : 0;
+                            if (pct != last)
+                            {
+                                last = pct;
+                                form.Report("p", pct.ToString());
+                            }
+                        }
+                        if (done < 1_000_000)
+                        {
+                            throw new IOException("файл обновления повреждён");
+                        }
+                    }
+                    form.Report("i", "Устанавливаю, программа перезапустится…");
+                    form.RestartInto(exe);
+                }
+                catch (Exception e)
+                {
+                    busy = false;
+                    form.Report("err", e.Message);
+                }
+            });
+        }
+
+        public string GetVersion()
+        {
+            return Application.ProductVersion.Split('+')[0];
+        }
+
+        public void OpenUrl(string url)
+        {
+            if (url != null && url.StartsWith("https://"))
+            {
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
+        }
 
         public string SaveFile(string name, string text)
         {

@@ -2,13 +2,17 @@ package ru.cnc.gcodeviewer;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
@@ -16,6 +20,8 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,10 +32,13 @@ public class MainActivity extends Activity {
 
     private static final int PICK_FILE = 1;
     private static final String SUBDIR = "CNC";
+    private static final String APK = "application/vnd.android.package-archive";
 
     private WebView web;
     private ValueCallback<Uri[]> fileCallback;
     private Uri cameraUri;
+    private final Handler ui = new Handler(Looper.getMainLooper());
+    private long updateId = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,7 +153,94 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void startUpdate(String url) {
+        if (updateId != -1) {
+            return;
+        }
+        try {
+            new File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "update.apk").delete();
+            DownloadManager.Request r = new DownloadManager.Request(Uri.parse(url));
+            r.setTitle(getString(R.string.app_name));
+            r.setDescription("Обновление");
+            r.setMimeType(APK);
+            r.setDestinationInExternalFilesDir(this, Environment.DIRECTORY_DOWNLOADS, "update.apk");
+            updateId = ((DownloadManager) getSystemService(DOWNLOAD_SERVICE)).enqueue(r);
+            ui.post(this::pollUpdate);
+        } catch (Exception e) {
+            updateId = -1;
+            report("err", e.getMessage());
+        }
+    }
+
+    // Прогресс загрузки обновления; по готовности — системное окно установки
+    private void pollUpdate() {
+        DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+        try (Cursor c = dm.query(new DownloadManager.Query().setFilterById(updateId))) {
+            if (c == null || !c.moveToFirst()) {
+                updateId = -1;
+                report("err", "загрузка отменена");
+                return;
+            }
+            int status = c.getInt(c.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS));
+            if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                Uri uri = dm.getUriForDownloadedFile(updateId);
+                updateId = -1;
+                report("i", "Подтвердите установку");
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setDataAndType(uri, APK);
+                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(i);
+                return;
+            }
+            if (status == DownloadManager.STATUS_FAILED) {
+                updateId = -1;
+                report("err", "не удалось скачать");
+                return;
+            }
+            long done = c.getLong(c.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
+            long total = c.getLong(c.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
+            report("p", String.valueOf(total > 0 ? done * 100 / total : 0));
+        } catch (Exception e) {
+            updateId = -1;
+            report("err", e.getMessage());
+            return;
+        }
+        ui.postDelayed(this::pollUpdate, 500);
+    }
+
+    private void report(String state, String value) {
+        web.evaluateJavascript("window.updProgress&&updProgress(" + JSONObject.quote(state) + ","
+                + JSONObject.quote(value == null ? "" : value) + ")", null);
+    }
+
     private class Bridge {
+        @JavascriptInterface
+        public void installUpdate(String url) {
+            if (url != null && url.startsWith("https://")) {
+                runOnUiThread(() -> startUpdate(url));
+            }
+        }
+
+        @JavascriptInterface
+        public String getVersion() {
+            try {
+                return getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+            } catch (Exception e) {
+                return "";
+            }
+        }
+
+        @JavascriptInterface
+        public void openUrl(String url) {
+            if (url == null || !url.startsWith("https://")) {
+                return;
+            }
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+            } catch (Exception ignored) {
+            }
+        }
+
         @JavascriptInterface
         public String saveFile(String name, String text) {
             String safe = name.replaceAll("[\\\\/:*?\"<>|]", "_");
