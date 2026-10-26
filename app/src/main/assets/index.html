@@ -17,7 +17,7 @@ input[type=range]{width:100%;margin:10px 0}
 .s{font-size:13px;color:var(--mut)}
 #er{font-size:13px;color:#D85A30}
 
-section[hidden]{display:none}
+section[hidden],[hidden]{display:none!important}
 .tabs{display:flex;gap:6px;margin-bottom:8px;position:sticky;top:0;z-index:5;background:var(--bg);padding:4px 0}
 .tb{flex:1}.tb.on,.tl button.on{background:#1D9E75;color:#fff;border-color:#1D9E75}
 .tl{display:flex;gap:6px;overflow-x:auto;margin:6px 0;padding-bottom:2px}
@@ -110,6 +110,54 @@ label.p{background:#1D9E75;color:#fff;border-color:#1D9E75}
 .f input{min-width:52px}
 #stepR button:not(.ib){flex:1;justify-content:center}
 #stepR button{touch-action:manipulation;user-select:none;-webkit-user-select:none}
+
+/* ПК: широкий экран и мышь — боковое меню, холсты на всю высоту, панели сбоку */
+@media (min-width:1100px) and (hover:hover) and (pointer:fine){
+main{max-width:none;display:grid;grid-template-columns:190px minmax(0,1fr);column-gap:20px;align-items:start;padding:16px 20px}
+.tabs{grid-column:1;grid-row:1;flex-direction:column;gap:4px;top:16px;margin:0;padding:0}
+.tabs .tb{flex:none;flex-direction:row;justify-content:flex-start;gap:10px;font-size:14px;padding:10px 12px;background:transparent;border-color:transparent}
+.tabs .tb:hover{background:var(--sf)}
+.tabs .tb.on{background:#1D9E75;border-color:#1D9E75}
+main>section{grid-column:2;grid-row:1;min-width:0}
+button:not(.p):not(.on):hover,label.b:hover{border-color:var(--mut)}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:5px}::-webkit-scrollbar-track{background:transparent}
+
+#t1:not([hidden]){display:grid;grid-template-columns:minmax(320px,420px) minmax(0,1fr);grid-template-rows:minmax(120px,1fr) repeat(7,auto) auto auto;column-gap:20px;height:calc(100vh - 32px)}
+#t1>*{grid-column:1}
+#src{grid-row:1;height:100%!important;resize:none}
+#t1>.cw{grid-column:2;grid-row:1/9}
+#t1>.cw canvas{height:100%;min-height:0}
+#t1>#sl{grid-column:2;grid-row:9;margin:10px 0 6px}
+#t1>#stepR{grid-column:2;grid-row:10}
+#stepR button:not(.ib){flex:0 1 200px}
+
+#cadMode{max-width:420px}
+#m2d:not([hidden]),#m3d:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) 360px;grid-template-rows:auto auto auto repeat(10,auto) 1fr;column-gap:20px;align-items:start;height:calc(100vh - 82px)}
+#m2d>*,#m3d>*{grid-column:2}
+#tools{grid-column:1/-1;grid-row:1}#axr{grid-column:1/-1;grid-row:2}#chr{grid-column:1/-1;grid-row:3}
+#h2{grid-row:4}#i2{grid-row:5}#edp{grid-row:6}#m2d>details:not(#ioD){grid-row:7}#ioD{grid-row:8}
+#tools button{flex:0 0 auto;min-width:78px}
+#m2d>.cw,#m3d>.cw{grid-column:1;grid-row:4/-1;align-self:stretch}
+#m3d>.cw{grid-row:1/-1}
+#c2,#c4{height:100%;min-height:0}
+#m2d>.s,#m2d>details{margin:0 0 8px}
+#m2d>.cd,#m3d>.cd{margin:0 0 10px}
+
+#opView:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:repeat(10,auto) 1fr;column-gap:20px;align-items:start}
+#opView>*{grid-column:1}
+#sumCard{grid-column:2;grid-row:1/-1;position:sticky;top:16px;margin:0}
+#out3{height:calc(100vh - 230px)}
+#opEd{max-width:980px}
+#c3{height:340px}
+
+#t4:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto auto auto 1fr;column-gap:20px;align-items:start}
+#t4>.cd{grid-column:1;margin:0 0 12px}
+#t4>.cd:nth-child(2){grid-column:2;grid-row:1/-1}
+
+#t5>.cd{max-width:720px}
+#lbList{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));column-gap:12px}
+#lbList>:not(.opc){grid-column:1/-1}
+}
 </style></head><body><main>
 <nav class="tabs"><button class="tb on" id="tb1" data-i="path">Траектория</button><button class="tb" id="tb2" data-i="pencil">Чертёж</button><button class="tb" id="tb3" data-i="list">Операции</button><button class="tb" id="tb4" data-i="tool">Инструмент</button><button class="tb" id="tb5" data-i="file">Файлы</button></nav>
 <section id="t1">
