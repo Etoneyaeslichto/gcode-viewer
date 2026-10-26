@@ -2,21 +2,36 @@ plugins {
     id 'com.android.application'
 }
 
+def runNumber = (System.getenv('GITHUB_RUN_NUMBER') ?: '1').toInteger()
+
 android {
-    namespace 'com.gcode.viewer'
+    namespace 'ru.cnc.gcodeviewer'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.gcode.viewer"
+        applicationId 'ru.cnc.gcodeviewer'
         minSdk 24
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        versionCode runNumber
+        versionName "1.0.${runNumber}"
+    }
+
+    signingConfigs {
+        app {
+            storeFile file('release.jks')
+            storePassword 'gcode-viewer'
+            keyAlias 'gcode'
+            keyPassword 'gcode-viewer'
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.app
+        }
+        debug {
+            signingConfig signingConfigs.app
         }
     }
 
