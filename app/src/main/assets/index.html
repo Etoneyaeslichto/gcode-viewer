@@ -105,6 +105,11 @@ label.p{background:#1D9E75;color:#fff;border-color:#1D9E75}
 #mdEdge .sw,#mdEdge .pg{margin-top:8px}
 .ck{display:inline-flex;align-items:center;gap:6px;font-size:13px;white-space:nowrap;padding:0 4px}
 #chr .f{height:34px;flex:none;width:150px}
+#st{white-space:pre-line}
+.f span{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.f input{min-width:52px}
+#stepR button:not(.ib){flex:1;justify-content:center}
+#stepR button{touch-action:manipulation;user-select:none;-webkit-user-select:none}
 </style></head><body><main>
 <nav class="tabs"><button class="tb on" id="tb1" data-i="path">Траектория</button><button class="tb" id="tb2" data-i="pencil">Чертёж</button><button class="tb" id="tb3" data-i="list">Операции</button><button class="tb" id="tb4" data-i="tool">Инструмент</button><button class="tb" id="tb5" data-i="file">Файлы</button></nav>
 <section id="t1">
@@ -112,7 +117,7 @@ label.p{background:#1D9E75;color:#fff;border-color:#1D9E75}
 <label class="f" style="margin-top:8px"><span>Название</span><input id="fname" placeholder="обязательно для сохранения" style="text-align:right"></label><div class="row"><button class="p" id="go" data-i="play">Показать</button><label class="b" data-i="file">Файл<input type="file" id="fl" hidden></label><button id="sv" data-i="save">Сохранить .nc</button><button id="cl" data-i="trash">Очистить</button></div>
 <div id="er"></div><div class="s" id="wn"></div><div class="s" id="ms"></div>
 <div class="cw"><canvas id="cv"></canvas><div class="ov"><button id="vt" data-i="top" title="Сверху"></button><button id="vi" data-i="cube" title="Объём"></button><button id="vf" data-i="fit" title="Вписать"></button></div></div>
-<input type="range" id="sl" min="0" max="0" value="0">
+<input type="range" id="sl" min="0" max="0" value="0"><div class="row" id="stepR" style="margin:0"><button id="sStart" class="ib" aria-label="В начало" data-i="first"></button><button id="sPrev" data-i="prev">Кадр назад</button><button id="sNext" class="p" data-i="next">Кадр вперёд</button></div>
 <div class="s" id="st"></div>
 <details class="s"><summary>Настройки стойки</summary><label><input type="checkbox" id="dpi" checked> DPI=1 (целое без точки = мм)</label><br><label><input type="checkbox" id="lin"> G0 по прямой</label></details>
 </section>
@@ -121,8 +126,8 @@ label.p{background:#1D9E75;color:#fff;border-color:#1D9E75}
 <div id="m2d">
 <div class="tl" id="tools"><button data-k="sel" data-i="sel">Выбор</button><button data-k="line" data-i="line">Отрезок</button><button data-k="circ" data-i="circ">Окружность</button><button data-k="ax" data-i="ax">Прямая</button><button data-k="trim" data-i="trim">Обрезка</button><button data-k="dim" data-i="dim">Размер</button><button data-k="cham" data-i="cham">Фаска</button><button data-k="del" data-i="eraser">Удалить</button><button data-k="zero" data-i="zero">Ноль</button><button id="auxDel" data-i="auxdel">Убрать вспом.</button></div>
 <div class="tl" id="axr" style="display:none"><select id="axm"><option value="2p">Через 2 точки</option><option value="h">Горизонтальная</option><option value="v">Вертикальная</option><option value="par">Параллельная</option><option value="perp">Перпендикулярная</option></select><label class="f"><span>Сдвиг, мм</span><input id="axo" inputmode="decimal" placeholder="—"></label><label class="ck" id="axbw"><input type="checkbox" id="axb"> с двух сторон</label></div><div class="tl" id="zr" style="display:none"><button id="zCenter" data-i="zero">Ноль в центр детали</button></div>
-<div class="tl" id="chr" style="display:none"><select id="chm"><option value="c">Фаска</option><option value="f">Скругление</option></select><label class="f"><span id="chAl">Катет 1, мм</span><input id="chA" inputmode="decimal" value="1"></label><label class="f" id="chBw"><span>Катет 2, мм</span><input id="chB" inputmode="decimal" placeholder="= катет 1"></label></div><div class="cw"><canvas id="c2"></canvas><div class="sb"><button id="bAux" data-i="aux" title="Вспомогательная линия"></button><button id="bOrt" data-i="ort" title="Орто"></button><button id="bGrd" data-i="grid" title="Сетка"></button><button id="bUn" data-i="undo" title="Отмена"></button><button id="bEsc" data-i="esc" title="Esc: закончить"></button><button id="bFit" data-i="fit" title="Вписать"></button><button id="bClr" data-i="trash" title="Очистить чертёж"></button></div></div>
-<div class="s" id="h2"></div><div class="s" id="i2"></div>
+<div class="tl" id="chr" style="display:none"><select id="chm"><option value="c">Фаска</option><option value="f">Скругление</option></select><label class="f"><span id="chAl">Размер, мм</span><input id="chA" inputmode="decimal" value="1"></label></div><div class="cw"><canvas id="c2"></canvas><div class="sb"><button id="bAux" data-i="aux" title="Вспомогательная линия"></button><button id="bOrt" data-i="ort" title="Орто"></button><button id="bGrd" data-i="grid" title="Сетка"></button><button id="bUn" data-i="undo" title="Отмена"></button><button id="bEsc" data-i="esc" title="Esc: закончить"></button><button id="bFit" data-i="fit" title="Вписать"></button><button id="bClr" data-i="trash" title="Очистить чертёж"></button></div></div>
+<div class="s" id="h2"></div><div class="s" id="i2"></div><div class="cd" id="edp" hidden></div>
 <details class="s"><summary data-i="ruler">Точный ввод</summary><div class="pi">
 <div class="pr"><b>Точка<small>по координатам</small></b><label class="f"><span style="color:#D85A30">X</span><input id="nx" inputmode="decimal" placeholder="0"></label><label class="f"><span style="color:#1D9E75">Y</span><input id="ny" inputmode="decimal" placeholder="0"></label></div>
 <div class="pr"><b>Окружность<small>радиус</small></b><label class="f"><span>R</span><input id="nr" inputmode="decimal" placeholder="0"></label><i></i></div>
@@ -135,7 +140,7 @@ label.p{background:#1D9E75;color:#fff;border-color:#1D9E75}
 <section id="t3" hidden>
 <div id="opView">
 <div class="cd">
-<div class="pg"><label class="f"><span>Программа O</span><input id="pgN" inputmode="numeric"></label><label class="f"><span>Привязка</span><select id="pgW"><option>G54</option><option>G55</option><option>G56</option><option>G57</option><option>G58</option><option>G59</option><option>G54.1 P1</option><option>G54.1 P2</option><option>G54.1 P3</option><option>G54.1 P4</option><option>G54.1 P5</option><option>G54.1 P6</option><option>G54.1 P7</option><option>G54.1 P8</option><option>G54.1 P9</option><option>G54.1 P10</option><option>G54.1 P11</option><option>G54.1 P12</option><option>G54.1 P13</option><option>G54.1 P14</option><option>G54.1 P15</option><option>G54.1 P16</option><option>G54.1 P17</option><option>G54.1 P18</option><option>G54.1 P19</option><option>G54.1 P20</option><option>G54.1 P21</option><option>G54.1 P22</option><option>G54.1 P23</option><option>G54.1 P24</option><option>G54.1 P25</option><option>G54.1 P26</option><option>G54.1 P27</option><option>G54.1 P28</option><option>G54.1 P29</option><option>G54.1 P30</option><option>G54.1 P31</option><option>G54.1 P32</option><option>G54.1 P33</option><option>G54.1 P34</option><option>G54.1 P35</option><option>G54.1 P36</option><option>G54.1 P37</option><option>G54.1 P38</option><option>G54.1 P39</option><option>G54.1 P40</option><option>G54.1 P41</option><option>G54.1 P42</option><option>G54.1 P43</option><option>G54.1 P44</option><option>G54.1 P45</option><option>G54.1 P46</option><option>G54.1 P47</option><option>G54.1 P48</option></select></label></div><label class="f" style="margin-top:8px"><span>Название</span><input id="pgName" placeholder="обязательно" style="text-align:right"></label>
+<div class="pg"><label class="f"><span>Привязка</span><select id="pgW"><option>G54</option><option>G55</option><option>G56</option><option>G57</option><option>G58</option><option>G59</option><option>G54.1 P1</option><option>G54.1 P2</option><option>G54.1 P3</option><option>G54.1 P4</option><option>G54.1 P5</option><option>G54.1 P6</option><option>G54.1 P7</option><option>G54.1 P8</option><option>G54.1 P9</option><option>G54.1 P10</option><option>G54.1 P11</option><option>G54.1 P12</option><option>G54.1 P13</option><option>G54.1 P14</option><option>G54.1 P15</option><option>G54.1 P16</option><option>G54.1 P17</option><option>G54.1 P18</option><option>G54.1 P19</option><option>G54.1 P20</option><option>G54.1 P21</option><option>G54.1 P22</option><option>G54.1 P23</option><option>G54.1 P24</option><option>G54.1 P25</option><option>G54.1 P26</option><option>G54.1 P27</option><option>G54.1 P28</option><option>G54.1 P29</option><option>G54.1 P30</option><option>G54.1 P31</option><option>G54.1 P32</option><option>G54.1 P33</option><option>G54.1 P34</option><option>G54.1 P35</option><option>G54.1 P36</option><option>G54.1 P37</option><option>G54.1 P38</option><option>G54.1 P39</option><option>G54.1 P40</option><option>G54.1 P41</option><option>G54.1 P42</option><option>G54.1 P43</option><option>G54.1 P44</option><option>G54.1 P45</option><option>G54.1 P46</option><option>G54.1 P47</option><option>G54.1 P48</option></select></label></div><label class="f" style="margin-top:8px"><span>Название</span><input id="pgName" placeholder="обязательно" style="text-align:right"></label>
 <details class="s" id="stkD" style="margin:0"><summary data-i="box">Заготовка <span id="stkSum" style="color:var(--mut)"></span></summary><div class="pi"><div class="pg"><label class="f"><span>X от</span><input id="sk_x0" inputmode="decimal"></label><label class="f"><span>X до</span><input id="sk_x1" inputmode="decimal"></label><label class="f"><span>Y от</span><input id="sk_y0" inputmode="decimal"></label><label class="f"><span>Y до</span><input id="sk_y1" inputmode="decimal"></label><label class="f"><span>Z верх</span><input id="sk_zt" inputmode="decimal"></label><label class="f"><span>Z низ</span><input id="sk_zb" inputmode="decimal"></label></div><div class="row" style="margin:0"><button id="stkDraw" data-i="fit">По чертежу +2 мм</button><button id="stkOff">Без заготовки</button></div></div></details>
 </div>
 <div id="opList"></div>
@@ -176,7 +181,7 @@ function mb(s,i){var d=0;for(var j=i;j<s.length;j++){if(s[j]==='[')d++;else if(s
 function words(s){var o=[],i=0;while(i<s.length){var c=s[i++];if(!/[A-Z]/.test(c))continue;var j=i;if(s[j]==='-'||s[j]==='+')j++;if(s[j]==='['){j=mb(s,j)+1}else if(s[j]==='#'){j++;while(/\d/.test(s[j]||''))j++}else{while(/[\d.]/.test(s[j]||''))j++}o.push([c,s.slice(i,j)]);i=j}return o}
 function interp(src,opt){opt=opt||{};var dpi=opt.dpi!==false,lin=!!opt.lin,mc=mach();
 var err='',V={},raw=[],msg=[],num=[],warn={},nPt=0,nM6=0;
-String(src).split('\n').forEach(function(l,i){var m=(l.match(/\(([^)]*)\)/)||[])[1]||'',s=l.replace(/\([^)]*\)/g,'').replace(/\s+/g,'').toUpperCase().replace(/^\//,'');if(s&&s!=='%'){raw.push(s);msg.push(m);num.push(i+1)}});
+String(src).split('\n').forEach(function(l,i){var m=(l.match(/\(([^)]*)\)/)||[])[1]||'',s=l.replace(/\([^)]*\)/g,'').replace(/;/g,'').replace(/\s+/g,'').toUpperCase().replace(/^\//,'').replace(/^<[^>]*>/,'');if(s&&s!=='%'){raw.push(s);msg.push(m);num.push(i+1)}});
 var lab={};raw.forEach(function(s,i){var m=s.match(/^N(\d+)/);if(m)lab[+m[1]]=i});
 var L=raw.map(function(s){return s.replace(/^N\d+/,'')});
 var g=function(n){return V[n]||0};
@@ -265,7 +270,7 @@ var prev=pj(pts[0].x,pts[0].y,pts[0].z);
 for(var i=1;i<pts.length;i++){var p=pts[i],cur=pj(p.x,p.y,p.z),done=i<=idx?1:0;var ci=(p.r?0:2)+(done?0:1);if(!p.brk)cats[ci][4].push(prev[0],prev[1],cur[0],cur[1]);prev=cur}
 cats.forEach(function(k){c.strokeStyle=k[2];c.lineWidth=k[3];c.lineJoin='round';c.beginPath();var a=k[4];for(var j=0;j<a.length;j+=4){c.moveTo(a[j],a[j+1]);c.lineTo(a[j+2],a[j+3])}c.stroke()});
 var t=pts[idx],tp=pj(t.x,t.y,t.z);c.fillStyle='#D85A30';c.beginPath();c.arc(tp[0],tp[1],5,0,7);c.fill();
-$('st').textContent='Время ≈ '+fmtT(bb.time)+' · строка '+(t.ln||'—')+' · X'+t.x.toFixed(2)+' Y'+t.y.toFixed(2)+' Z'+t.z.toFixed(2)}
+var bl=t.ln?String($('src').value.split('\n')[t.ln-1]||'').trim():'';$('st').textContent='Время ≈ '+fmtT(bb.time)+' · строка '+(t.ln||'—')+' · X'+t.x.toFixed(2)+' Y'+t.y.toFixed(2)+' Z'+t.z.toFixed(2)+(bl?'\nКадр: '+bl:'')}
 function view(top){m3=!top;yaw=top?0:-0.6;pit=top?Math.PI/2:0.6;zm=1;px=0;py=0;draw()}
 function ms(t){$('ms').textContent=t}
 $('go').onclick=function(){run($('src').value)};
@@ -275,6 +280,9 @@ $('sv').onclick=function(){var t=$('src').value,fn=$('fname').value.trim();if(!t
 $('fname').addEventListener('input',function(){if(this.value.trim())this.parentNode.classList.remove('err')});
 $('vt').onclick=function(){view(true)};$('vi').onclick=function(){view(false)};$('vf').onclick=function(){zm=1;px=0;py=0;draw()};
 $('sl').oninput=function(){idx=+this.value;draw()};
+function stepBlk(d){if(!pts.length)return false;var i=idx,cur=pts[i].ln;if(d>0){if(i>=pts.length-1)return false;while(i<pts.length-1&&pts[i].ln===cur)i++;var nl=pts[i].ln;while(i<pts.length-1&&pts[i+1].ln===nl)i++}else{if(i<=0)return false;while(i>0&&pts[i].ln===cur)i--}idx=i;$('sl').value=idx;draw();return true}
+['sPrev','sNext'].forEach(function(id,k){var b=$(id),T=null,stop=function(){clearTimeout(T);clearInterval(T);T=null};b.addEventListener('pointerdown',function(e){e.preventDefault();stepBlk(k?1:-1);stop();T=setTimeout(function(){T=setInterval(function(){if(!stepBlk(k?1:-1))stop()},90)},450)});['pointerup','pointerleave','pointercancel'].forEach(function(ev){b.addEventListener(ev,stop)});b.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();stepBlk(k?1:-1)}})});
+$('sStart').onclick=function(){if(!pts.length)return;idx=0;$('sl').value=0;draw()};
 $('fl').onchange=function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){$('src').value=r.result;run(r.result);view(false)};r.readAsText(f)};
 var ptr=new Map(),ld=0;
 function pd(){var a=Array.from(ptr.values());return a.length<2?0:Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1])}
@@ -318,11 +326,19 @@ else if(o.t==='c'){SP.push([o.c,'центр']);if(o.a0===undefined)[0,1,2,3].for
 else if(o.t==='x')SP.push([o.p,'точка'])});
 for(var i=0;i<D.length;i++)for(var j=i+1;j<D.length;j++)if(CV(D[i])&&CV(D[j]))X(D[i],D[j]).forEach(function(p){SP.push([p,'пересечение'])})}
 function gs(){var r=40/V.s,m=Math.pow(10,Math.floor(Math.log(r)/Math.LN10)),k=r/m;return k<=1?m:k<=2?2*m:k<=5?5*m:10*m}
-function snapAt(q){var w=s2u(q),best=null,bd=16/V.s;
-SP.forEach(function(s){var d=md(s[0],w);if(d<bd){bd=d;best=s}});
+function nearOn(o,w){if(o.t==='l'||o.t==='x'){var l=lp(o),d=l[1],L=d[0]*d[0]+d[1]*d[1],t=((w[0]-l[0][0])*d[0]+(w[1]-l[0][1])*d[1])/L;if(o.t==='l')t=Math.max(0,Math.min(1,t));return [l[0][0]+t*d[0],l[0][1]+t*d[1]]}
+var a=ang(o.c,w);if(o.a0!==undefined&&mod(a-o.a0)>span(o)){var e0=cp(o,o.a0),e1=cp(o,o.a1);return md(e0,w)<md(e1,w)?e0:e1}return cp(o,a)}
+function snapAt(q,ex,skp){var w=s2u(q),best=null,bd=22/V.s,okp=function(p){return !skp||md(p,skp)>1e-6};
+SP.forEach(function(s){if(!okp(s[0]))return;var d=md(s[0],w);if(d<bd){bd=d;best=s}});
+if(pend&&(tool==='line'||tool==='ax'||tool==='dim')){var cand=[];D.forEach(function(o,i){if(i===ex)return;
+if(o.t==='l'||o.t==='x'){var l=lp(o),d=l[1],L=d[0]*d[0]+d[1]*d[1],t=((pend[0]-l[0][0])*d[0]+(pend[1]-l[0][1])*d[1])/L,f=[l[0][0]+t*d[0],l[0][1]+t*d[1]];if((o.t==='x'||(t>-1e-9&&t<1+1e-9))&&md(f,pend)>1e-6)cand.push([f,'нормаль'])}
+else if(o.t==='c'){var dc=md(pend,o.c);if(dc>1e-6){if(dc>o.r+1e-6){var aa=Math.acos(o.r/dc),bb=ang(o.c,pend);[bb+aa,bb-aa].forEach(function(g){var p=cp(o,g);if(on(o,p))cand.push([p,'касательная'])})}var u=[(pend[0]-o.c[0])/dc,(pend[1]-o.c[1])/dc];[[o.c[0]+u[0]*o.r,o.c[1]+u[1]*o.r],[o.c[0]-u[0]*o.r,o.c[1]-u[1]*o.r]].forEach(function(p){if(on(o,p))cand.push([p,'нормаль'])})}}});
+cand.forEach(function(s){var d=md(s[0],w);if(d<bd){bd=d;best=s}})}
 var r=best?{p:best[0].slice(),k:best[1]}:{p:w,k:''};
-if(!best&&grd){var g=gs();r.p=[Math.round(w[0]/g)*g,Math.round(w[1]/g)*g];r.k='сетка'}
-if(ort&&pend&&tool==='line'&&!best){if(Math.abs(r.p[0]-pend[0])>Math.abs(r.p[1]-pend[1]))r.p[1]=pend[1];else r.p[0]=pend[0]}
+if(!best){var SRC=GR&&GR.B0?GR.B0:D,bo=-1,bdo=14/V.s;SRC.forEach(function(o,i){if(i===ex||!CV(o))return;if(skp&&o.t==='l'&&(md(o.a,skp)<1e-6||md(o.b,skp)<1e-6))return;var d=dist(o,w);if(d<bdo){bdo=d;bo=i}});if(bo>=0){r.p=nearOn(SRC[bo],w);r.k='на объекте'}}
+if(!best&&r.k===''){var ax=null,ay=null,tx=9/V.s,ty=9/V.s;SP.forEach(function(s){if(!okp(s[0]))return;var dx=Math.abs(s[0][0]-w[0]),dy=Math.abs(s[0][1]-w[1]);if(dx<tx){tx=dx;ax=s[0]}if(dy<ty){ty=dy;ay=s[0]}});if(ax||ay){r.p=[ax?ax[0]:w[0],ay?ay[1]:w[1]];r.k='выравнивание';r.al=[ax,ay]}}
+if(!best&&r.k===''&&grd){var g=gs();r.p=[Math.round(w[0]/g)*g,Math.round(w[1]/g)*g];r.k='сетка'}
+if(ort&&pend&&tool==='line'&&!best&&r.k!=='на объекте'){if(Math.abs(r.p[0]-pend[0])>Math.abs(r.p[1]-pend[1]))r.p[1]=pend[1];else r.p[0]=pend[0]}
 return r}
 function dist(o,w){
 if(o.t==='l'||o.t==='x'){var l=lp(o),d=l[1],L=d[0]*d[0]+d[1]*d[1],t=((w[0]-l[0][0])*d[0]+(w[1]-l[0][1])*d[1])/L;if(o.t==='l')t=Math.max(0,Math.min(1,t));return Math.hypot(w[0]-l[0][0]-t*d[0],w[1]-l[0][1]-t*d[1])}
@@ -361,9 +377,36 @@ var c1=nm($('chA').value);if(!(c1>0)){info='Укажите размер';return}
 if($('chm').value==='f'){var th=Math.acos(Math.max(-1,Math.min(1,cs))),t_=c1/Math.tan(th/2);if(t_>=la-1e-9||t_>=lb-1e-9){info='Радиус '+nf(c1)+' не помещается: нужна длина сторон больше '+nf(t_);return}
 var T1=[P[0]+e1[0]*t_,P[1]+e1[1]*t_],T2=[P[0]+e2[0]*t_,P[1]+e2[1]*t_],bs=[e1[0]+e2[0],e1[1]+e2[1]],bl=Math.hypot(bs[0],bs[1]),dc=c1/Math.sin(th/2),C=[P[0]+bs[0]/bl*dc,P[1]+bs[1]/bl*dc],g1=ang(C,T1),g2=ang(C,T2),a0=mod(g2-g1)<Math.PI?g1:g2,a1=a0===g1?g2:g1;
 mut(function(){D[best.i][best.ka]=T1;D[best.j][best.kb]=T2;D.push({t:'c',c:C,r:c1,a0:mod(a0),a1:mod(a1)})},1);info='Скругление R'+nf(c1)+' поставлено. '+info;return}
-var c2=nm($('chB').value);if(!(c2>0))c2=c1;if(c1>=la-1e-9||c2>=lb-1e-9){info='Фаска больше стороны угла';return}
+var c2=c1;if(c1>=la-1e-9||c2>=lb-1e-9){info='Фаска больше стороны угла';return}
 var P1=[P[0]+e1[0]*c1,P[1]+e1[1]*c1],P2=[P[0]+e2[0]*c2,P[1]+e2[1]*c2];
-mut(function(){D[best.i][best.ka]=P1;D[best.j][best.kb]=P2;D.push({t:'l',a:P1,b:P2})},1);info='Фаска '+nf(c1)+(c2!==c1?'×'+nf(c2):'')+' поставлена. '+info}
+mut(function(){D[best.i][best.ka]=P1;D[best.j][best.kb]=P2;D.push({t:'l',a:P1,b:P2})},1);info='Фаска '+nf(c1)+'×45° поставлена. '+info}
+var GR=null;
+function grips(o){if(!o)return [];if(o.t==='l')return [[o.a,'a'],[o.b,'b'],[[(o.a[0]+o.b[0])/2,(o.a[1]+o.b[1])/2],'m']];if(o.t==='c')return [[o.c,'c'],[cp(o,o.a0===undefined?Math.PI/4:o.a0+span(o)/2),'r']];if(o.t==='x')return [[o.p,'p']];return []}
+function gripAt(q){if(tool!=='sel'||sel<0||!D[sel])return null;var w=s2u(q),b=null,bd=20/V.s;grips(D[sel]).forEach(function(g){var d=md(g[0],w);if(d<bd){bd=d;b=g[1]}});return b}
+function moveP(B,old,nw){var n=0;B.forEach(function(x){if(x.t!=='l')return;if(md(x.a,old)<1e-6){x.a=nw.slice();n++}if(md(x.b,old)<1e-6){x.b=nw.slice();n++}});return n}
+function arcAt(B,p){return B.some(function(x){return x.t==='c'&&x.a0!==undefined&&(md(cp(x,x.a0),p)<1e-6||md(cp(x,x.a1),p)<1e-6)})}
+function gripMove(w){var B=JSON.parse(GR.s0),o=B[GR.i];
+if(GR.k==='a'||GR.k==='b')moveP(B,o[GR.k],w);
+else if(GR.k==='m'){var dx=w[0]-GR.w0[0],dy=w[1]-GR.w0[1],A=o.a,Bp=o.b;moveP(B,A,[A[0]+dx,A[1]+dy]);moveP(B,Bp,[Bp[0]+dx,Bp[1]+dy])}
+else if(GR.k==='c')o.c=w.slice();else if(GR.k==='r'){var r=md(o.c,w);if(r>1e-6)o.r=r}else if(GR.k==='p')o.p=w.slice();
+D=B}
+var ED=$('edp');
+function edFill(){var o=tool==='sel'&&sel>=0?D[sel]:null;if(!o||['l','c','x'].indexOf(o.t)<0){ED.hidden=true;ED.innerHTML='';return}
+var n=function(v){return String(parseFloat((+v).toFixed(4)))},f=function(k,l,v){return '<label class="f"><span>'+l+'</span><input id="ep_'+k+'" inputmode="decimal" value="'+n(v)+'"></label>'},h='';
+if(o.t==='l'){var L=md(o.a,o.b),A=mod(Math.atan2(o.b[1]-o.a[1],o.b[0]-o.a[0]))*180/Math.PI;h='<div class="h">Отрезок'+(o.u?' (вспом.)':'')+'</div><div class="pg">'+f('x1','X1',o.a[0]-Z0[0])+f('y1','Y1',o.a[1]-Z0[1])+f('x2','X2',o.b[0]-Z0[0])+f('y2','Y2',o.b[1]-Z0[1])+f('l','Длина',L)+f('an','Угол °',A)+'</div><div class="s">Длина и угол откладываются от точки 1. Соседние отрезки тянутся следом.</div>'}
+else if(o.t==='c'){h='<div class="h">'+(o.a0===undefined?'Окружность':'Дуга')+'</div><div class="pg">'+f('x','X центра',o.c[0]-Z0[0])+f('y','Y центра',o.c[1]-Z0[1])+f('r','Радиус',o.r)+f('dd','Диаметр',2*o.r)+'</div>'}
+else h='<div class="h">Вспом. прямая</div><div class="pg">'+f('x','X точки',o.p[0]-Z0[0])+f('y','Y точки',o.p[1]-Z0[1])+f('an','Угол °',mod(Math.atan2(o.d[1],o.d[0]))*180/Math.PI)+'</div>';
+ED.innerHTML=h+'<div class="row" style="margin:0"><button class="p" id="epOk">Применить</button><button id="epDel">Удалить</button></div>';ED.hidden=false;
+ED.querySelectorAll('input').forEach(function(i){i.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();edApply()}})});
+$('epOk').onclick=edApply;$('epDel').onclick=function(){var k=sel;sel=-1;mut(function(){D.splice(k,1)});info='Удалено';edFill();draw2()}}
+function edApply(){var o=D[sel];if(!o)return;var g=function(k){var e=$('ep_'+k);if(!e)return null;var v=parseFloat(String(e.value).replace(',','.'));return isNaN(v)?null:v},B=JSON.parse(JSON.stringify(D)),x=B[sel],note='';
+if(o.t==='l'){var a=[g('x1'),g('y1')],b=[g('x2'),g('y2')];if(a.concat(b).some(function(v){return v===null}))return;a=[a[0]+Z0[0],a[1]+Z0[1]];b=[b[0]+Z0[0],b[1]+Z0[1]];
+var L0=md(o.a,o.b),A0=mod(Math.atan2(o.b[1]-o.a[1],o.b[0]-o.a[0]))*180/Math.PI,L=g('l'),An=g('an');
+if(L!==null&&An!==null&&(Math.abs(L-L0)>5e-5||Math.abs(((An-A0)%360+540)%360-180)>5e-5))b=[a[0]+L*Math.cos(An*Math.PI/180),a[1]+L*Math.sin(An*Math.PI/180)];
+if(md(a,b)<1e-9){info='Нулевая длина';draw2();return}var oa=o.a.slice(),ob=o.b.slice();if(arcAt(B,oa)&&md(a,oa)>1e-6||arcAt(B,ob)&&md(b,ob)>1e-6)note=' Дуги, примыкающие к концам, не подтягиваются — поправьте их.';moveP(B,oa,a);x.a=a;moveP(B,ob,b);x.b=b}
+else if(o.t==='c'){var cx=g('x'),cy=g('y'),r=g('r'),dd=g('dd');if(cx===null||cy===null)return;if(dd!==null&&Math.abs(dd-2*o.r)>5e-5)r=dd/2;if(!(r>0)){info='Радиус должен быть больше 0';draw2();return}x.c=[cx+Z0[0],cy+Z0[1]];x.r=r}
+else{var px=g('x'),py=g('y'),an=g('an');if(px===null||py===null||an===null)return;x.p=[px+Z0[0],py+Z0[1]];x.d=[Math.cos(an*Math.PI/180),Math.sin(an*Math.PI/180)]}
+HS.push(JSON.stringify(D));if(HS.length>60)HS.shift();D=B;rb();sv();info=props(D[sel])+note;edFill();draw2()}
 function act(w){var t=tool,am=$('axm').value;
 if(t==='line'){if(!pend)pend=w;else if(md(pend,w)>1e-9){var a=pend;mut(function(){D.push({t:'l',a:a,b:w,u:aux})},1);pend=w}}
 else if(t==='circ'){var R=parseFloat($('nr').value);if(!pend&&R>0)mut(function(){D.push({t:'c',c:w,r:R,u:aux})},1);else if(!pend)pend=w;else{var r=md(pend,w),c0=pend;pend=null;if(r>1e-9)mut(function(){D.push({t:'c',c:c0,r:r,u:aux})},1)}}
@@ -373,7 +416,7 @@ else if(am==='h'||am==='v')mut(function(){D.push({t:'x',p:w,d:am==='h'?[1,0]:[0,
 else if(ref!==null){var L=lp(D[ref]),d=L[1],ln=Math.hypot(d[0],d[1])||1,u=[d[0]/ln,d[1]/ln],nrm=[-u[1],u[0]],off=parseFloat(String($('axo').value).replace(',','.')),pt=w,ro=D[ref];if(!isNaN(off)){var rl=[w[0]-L[0][0],w[1]-L[0][1]];if(am==='par'){var sd=(rl[0]*nrm[0]+rl[1]*nrm[1])<0?-1:1;pt=[L[0][0]+nrm[0]*sd*off,L[0][1]+nrm[1]*sd*off]}else{var tt=rl[0]*u[0]+rl[1]*u[1];if(ro.t==='l'){var fa=Math.abs(tt)<=Math.abs(ln-tt),bs=fa?ro.a:ro.b,dr=fa?1:-1;pt=[bs[0]+u[0]*dr*off,bs[1]+u[1]*dr*off]}else{var s2=tt<0?-1:1;pt=[L[0][0]+u[0]*s2*off,L[0][1]+u[1]*s2*off]}}}var pts=[pt];if($('axb').checked){if(am==='par'){var rq=[pt[0]-L[0][0],pt[1]-L[0][1]],kq=rq[0]*nrm[0]+rq[1]*nrm[1];if(Math.abs(kq)>1e-9)pts.push([pt[0]-2*kq*nrm[0],pt[1]-2*kq*nrm[1]])}else{var M=ro.t==='l'?[(ro.a[0]+ro.b[0])/2,(ro.a[1]+ro.b[1])/2]:L[0];if(!isNaN(off)&&ro.t==='l'){pt=[M[0]+u[0]*off,M[1]+u[1]*off];pts=[pt]}var rq2=[pt[0]-M[0],pt[1]-M[1]],kq2=rq2[0]*u[0]+rq2[1]*u[1];if(Math.abs(kq2)>1e-9)pts.push([pt[0]-2*kq2*u[0],pt[1]-2*kq2*u[1]])}}var dd=am==='par'?d.slice():[-d[1],d[0]];ref=null;mut(function(){pts.forEach(function(q){D.push({t:'x',p:q,d:dd.slice(),u:1})})},1)}}
 else if(t==='dim'){if(!pend)pend=w;else{var a3=pend;pend=null;mut(function(){D.push({t:'d',a:a3,b:w})},1)}}}
 function click(q){var s=snapAt(q);sn=s;var w=s.p,t=tool,i;
-if(t==='sel'){i=hit(q);sel=i;info=i>=0?props(D[i]):''}
+if(t==='sel'){i=hit(q);sel=i;info=i>=0?props(D[i]):'';edFill()}
 else if(t==='trim'){i=hit(q);if(i>=0)trim(i,s2u(q))}
 else if(t==='cham'){corner(s2u(q))}
 else if(t==='del'){i=hit(q);if(i>=0)mut(function(){D.splice(i,1)})}
@@ -382,13 +425,13 @@ else if(t==='zero'){Z0=w.slice();try{localStorage.setItem('cad0',JSON.stringify(
 else if(t==='ax'&&ref===null&&['par','perp'].indexOf($('axm').value)>=0){i=hit(q);if(i>=0&&(D[i].t==='l'||D[i].t==='x')){ref=i;sel=i}}
 else act(w)}
 function hint(){var t=tool,m=$('axm').value;
-if(t==='sel')return 'Нажмите на объект: покажу размеры и координаты';
+if(t==='sel')return sel>=0?'Тяните за кружки — концы, квадрат — сдвиг; или впишите числа ниже':'Нажмите на объект: покажу размеры и дам изменить';
 if(t==='zero')return 'Нажмите точку — ноль детали вручную. Сейчас: '+(localStorage.getItem('cad0m')==='1'?'выбран вручную':'центр детали');
 if(t==='line')return pend?'Вторая точка (Esc — закончить цепочку)':'Первая точка отрезка';
 if(t==='circ')return pend?'Точка на окружности':($('nr').value?'Центр (радиус из поля ввода)':'Центр окружности');
 if(t==='ax')return m==='2p'?(pend?'Вторая точка прямой':'Первая точка прямой'):(m==='h'||m==='v')?'Точка, через которую пройдёт прямая':(ref!==null?($('axo').value!==''?($('axb').checked?'Нажмите куда угодно — прямые встанут с двух сторон (сдвиг '+$('axo').value+' мм'+(m==='perp'?' от середины':'')+')':'Нажмите, с какой стороны поставить (сдвиг '+$('axo').value+' мм'+(m==='perp'?' от ближнего конца':'')+')'):($('axb').checked?'Точка одной из прямых, вторая встанет зеркально':'Точка, через которую пройдёт прямая')):'Укажите отрезок или прямую');
 if(t==='trim')return 'Нажмите на часть, которую нужно удалить';
-if(t==='cham')return 'Нажмите на угол — '+($('chm').value==='f'?'скругление R':'фаска')+' встанет между двумя отрезками'+($('chm').value==='c'?' (катет 1 — по отрезку, ближнему к нажатию)':'');
+if(t==='cham')return 'Нажмите на угол — '+($('chm').value==='f'?'скругление R':'фаска')+' встанет между двумя отрезками'+' '+$('chA').value+' мм';
 if(t==='dim')return pend?'Вторая точка размера':'Точка 1 или нажмите на окружность';
 return 'Нажмите на объект, чтобы удалить'}
 function label(c,t,x,y,col,bg){c.setLineDash([]);c.font='12px sans-serif';c.lineWidth=3;c.strokeStyle=bg;c.strokeText(t,x,y);c.fillStyle=col;c.fillText(t,x,y)}
@@ -421,6 +464,8 @@ if(o.t==='l'){p=u2s(o.a);q=u2s(o.b);c.moveTo(p[0],p[1]);c.lineTo(q[0],q[1])}
 else if(o.t==='x'){var L=(cw+ch)/V.s,mm=Math.hypot(o.d[0],o.d[1]),dd=[o.d[0]/mm*L,o.d[1]/mm*L];p=u2s([o.p[0]-dd[0],o.p[1]-dd[1]]);q=u2s([o.p[0]+dd[0],o.p[1]+dd[1]]);c.moveTo(p[0],p[1]);c.lineTo(q[0],q[1])}
 else if(o.t==='c'){m=u2s(o.c);if(o.a0===undefined)c.arc(m[0],m[1],o.r*V.s,0,TAU);else c.arc(m[0],m[1],o.r*V.s,-o.a0,-o.a1,true)}
 c.stroke()});
+if(sn&&sn.al){c.setLineDash([2,4]);c.strokeStyle='#7F77DD';c.lineWidth=1;var s2_=u2s(sn.p);sn.al.forEach(function(a){if(!a)return;var p=u2s(a);c.beginPath();c.moveTo(p[0],p[1]);c.lineTo(s2_[0],s2_[1]);c.stroke()})}
+if(tool==='sel'&&sel>=0&&D[sel])grips(D[sel]).forEach(function(g){var p=u2s(g[0]);c.setLineDash([]);c.fillStyle=sf;c.strokeStyle='#D85A30';c.lineWidth=2;c.beginPath();if(g[1]==='m'||g[1]==='c')c.rect(p[0]-7,p[1]-7,14,14);else c.arc(p[0],p[1],7,0,TAU);c.fill();c.stroke()});
 if(sn){var sp=u2s(sn.p);c.setLineDash([4,3]);c.strokeStyle='#D85A30';c.lineWidth=1.5;
 if(pend){var pp=u2s(pend);c.beginPath();
 if(tool==='circ')c.arc(pp[0],pp[1],md(pp,sp),0,TAU);
@@ -435,11 +480,11 @@ if(!xs.length){V={x:40,y:25,s:Math.max(0.5,cw/90)};return}
 var x0=Math.min.apply(0,xs),x1=Math.max.apply(0,xs),y0=Math.min.apply(0,ys),y1=Math.max.apply(0,ys);var sbw=cw>200?56:0;V.x=(x0+x1)/2;V.y=(y0+y1)/2;V.s=Math.max(0.05,Math.min(2000,Math.min((cw-sbw)/((x1-x0)||1),ch/((y1-y0)||1))*0.85));V.x+=sbw/2/V.s}
 function zoomAt(q,f){var w=s2u(q);V.s=Math.max(0.05,Math.min(2000,V.s*f));V.x=w[0]-(q[0]-cw/2)/V.s;V.y=w[1]+(q[1]-ch/2)/V.s}
 function mark(){[].forEach.call($('tools').children,function(b){b.classList.toggle('on',b.dataset.k===tool)});$('axr').style.display=tool==='ax'?'':'none';$('zr').style.display=tool==='zero'?'':'none';$('chr').style.display=tool==='cham'?'':'none';$('bAux').classList.toggle('on',aux);$('bOrt').classList.toggle('on',ort);$('bGrd').classList.toggle('on',grd)}
-[].forEach.call($('tools').children,function(b){b.onclick=function(){tool=b.dataset.k;pend=null;ref=null;sel=-1;mark();draw2()}});
+[].forEach.call($('tools').children,function(b){b.onclick=function(){tool=b.dataset.k;pend=null;ref=null;sel=-1;mark();edFill();draw2()}});
 $('axm').onchange=function(){pend=null;ref=null;draw2()};
 $('bAux').onclick=function(){if(sel>=0&&(D[sel].t==='l'||D[sel].t==='c')){HS.push(JSON.stringify(D));D[sel].u=!D[sel].u;sv()}else aux=!aux;mark();draw2()};
 $('bOrt').onclick=function(){ort=!ort;mark()};$('bGrd').onclick=function(){grd=!grd;mark()};
-$('bUn').onclick=function(){if(HS.length){D=JSON.parse(HS.pop());sel=-1;pend=null;rb();sv();info='';draw2()}};
+$('bUn').onclick=function(){if(HS.length){D=JSON.parse(HS.pop());sel=-1;pend=null;rb();sv();info='';edFill();draw2()}};
 $('bEsc').onclick=function(){pend=null;ref=null;sel=-1;draw2()};
 $('bFit').onclick=function(){fit();draw2()};
 $('bClr').onclick=function(){if(D.length){mut(function(){D=[]});info='Чертёж очищен (кнопка «Отмена» вернёт)';pend=null;draw2()}};
@@ -450,12 +495,12 @@ act(w);draw2()};
 var P=new Map(),sd=null,ld=0,mv=false;
 var pos=function(e){var r=c2.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top]};
 var pd2=function(){var a=Array.from(P.values());return a.length<2?0:Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1])};
-c2.onpointerdown=function(e){c2.setPointerCapture(e.pointerId);var q=pos(e);P.set(e.pointerId,q);if(P.size===1){sd=q;mv=false;sn=snapAt(q)}ld=pd2();draw2()};
-c2.onpointermove=function(e){var q=pos(e);if(!P.has(e.pointerId)){sn=snapAt(q);draw2();return}var o=P.get(e.pointerId);
+c2.onpointerdown=function(e){c2.setPointerCapture(e.pointerId);var q=pos(e);P.set(e.pointerId,q);if(P.size===1){sd=q;mv=false;sn=snapAt(q);var gk=gripAt(q);if(gk){var og=D[sel];GR={i:sel,k:gk,s0:JSON.stringify(D),B0:JSON.parse(JSON.stringify(D)),w0:s2u(q),op:gk==='a'?og.a.slice():gk==='b'?og.b.slice():gk==='c'?og.c.slice():null}}}ld=pd2();draw2()};
+c2.onpointermove=function(e){var q=pos(e);if(!P.has(e.pointerId)){sn=snapAt(q);draw2();return}if(GR&&P.size===1){var gs_=snapAt(q,GR.i,GR.op);sn=gs_;if(!mv&&Math.hypot(q[0]-sd[0],q[1]-sd[1])<4)return;mv=true;gripMove(GR.k==='m'?s2u(q):gs_.p);draw2();return}var o=P.get(e.pointerId);
 if(P.size===1){if(!mv&&Math.hypot(q[0]-sd[0],q[1]-sd[1])>8)mv=true;if(mv){V.x-=(q[0]-o[0])/V.s;V.y+=(q[1]-o[1])/V.s}else sn=snapAt(q)}
 else{mv=true;V.x-=(q[0]-o[0])/V.s/2;V.y+=(q[1]-o[1])/V.s/2}
 P.set(e.pointerId,q);if(P.size===2){var d=pd2();if(ld){var a=Array.from(P.values());zoomAt([(a[0][0]+a[1][0])/2,(a[0][1]+a[1][1])/2],d/ld)}ld=d}draw2()};
-c2.onpointerup=function(e){var q=pos(e),was=P.size;P.delete(e.pointerId);ld=0;if(was===1&&!mv)click(q);if(P.size===0)mv=false;draw2()};
+c2.onpointerup=function(e){if(GR){var uq=pos(e);P.delete(e.pointerId);ld=0;if(P.size>0)return;if(mv){var us=snapAt(uq,GR.i,GR.op);gripMove(GR.k==='m'?s2u(uq):us.p)}var ch_=GR.s0!==JSON.stringify(D),gi=GR.i;if(ch_){HS.push(GR.s0);if(HS.length>60)HS.shift();rb();sv();info=props(D[gi]);edFill()}GR=null;mv=false;draw2();return}var q=pos(e),was=P.size;P.delete(e.pointerId);ld=0;if(was===1&&!mv)click(q);if(P.size===0)mv=false;draw2()};
 c2.onpointercancel=function(e){P.delete(e.pointerId);ld=0};
 c2.addEventListener('wheel',function(e){e.preventDefault();zoomAt(pos(e),e.deltaY<0?1.15:0.87);draw2()},{passive:false});
 function tab(n){[1,2,3,4,5].forEach(function(k){$('t'+k).hidden=n!==k;$('tb'+k).classList.toggle('on',n===k)});window.scrollTo(0,0);
@@ -463,13 +508,13 @@ if(n===2){cw=c2.clientWidth;ch=c2.clientHeight;if(!fitted&&cw){fit();fitted=true
 [1,2,3,4,5].forEach(function(k){$('tb'+k).onclick=function(){tab(k)}});
 window.cadAutoZero=function(q){var m='0';try{m=localStorage.getItem('cad0m')||'0'}catch(e){}if(m==='1'||!window.partCenter)return;var c=window.partCenter(D);if(!c)return;if(md(c,Z0)>1e-9){Z0=c;try{localStorage.setItem('cad0',JSON.stringify(Z0))}catch(e){}}if(!q&&!$('t2').hidden)draw2()};
 $('zCenter').onclick=function(){try{localStorage.setItem('cad0m','0')}catch(e){}window.cadAutoZero();info='Ноль в центре детали';draw2()};
-$('chm').onchange=function(){var f=this.value==='f';$('chAl').textContent=f?'Радиус R, мм':'Катет 1, мм';$('chBw').style.display=f?'none':'';draw2()};
+$('chm').onchange=function(){var f=this.value==='f';$('chAl').textContent=f?'Радиус R, мм':'Размер, мм';draw2()};
 $('auxDel').onclick=function(){var n=D.filter(function(o){return o.u||o.t==='x'}).length;if(!n){info='Вспомогательных линий нет';draw2();return}mut(function(){D=D.filter(function(o){return !(o.u||o.t==='x')})});pend=null;ref=null;info='Удалено вспомогательных линий: '+n+' (кнопка «Отмена» вернёт)';draw2()};
 $('axb').onchange=function(){draw2()};
 window.addEventListener('resize',draw2);
-window.cadSet=function(nd,z){HS.push(JSON.stringify(D));D=nd;sel=-1;pend=null;rb();sv();if(z){Z0=z;try{localStorage.setItem('cad0',JSON.stringify(Z0))}catch(e){}}fitted=false;info='';if(!$('t2').hidden){cw=c2.clientWidth;ch=c2.clientHeight;if(cw){fit();fitted=true}draw2()}};
+window.cadSet=function(nd,z){HS.push(JSON.stringify(D));D=nd;sel=-1;edFill();pend=null;rb();sv();if(z){Z0=z;try{localStorage.setItem('cad0',JSON.stringify(Z0))}catch(e){}}fitted=false;info='';if(!$('t2').hidden){cw=c2.clientWidth;ch=c2.clientHeight;if(cw){fit();fitted=true}draw2()}};
 window.cadRedraw=function(){cw=c2.clientWidth;ch=c2.clientHeight;if(!fitted&&cw){fit();fitted=true}draw2()};
-var IC={sel:'<path d="M5 3l14 7-6 2-2 6z"/>',line:'<path d="M4 20L20 4"/><circle cx="4" cy="20" r="1.6"/><circle cx="20" cy="4" r="1.6"/>',circ:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="1"/>',ax:'<path d="M2 18L22 6" stroke-dasharray="3 3"/><path d="M12 4v3M12 17v3"/>',trim:'<circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8 16L18 4M16 16L6 4"/>',dim:'<path d="M4 7v10M20 7v10M4 12h16M7 10l-3 2 3 2M17 10l3 2-3 2"/>',eraser:'<path d="M4 16l9-10 7 6-7 8H8zM8 20h12"/>',aux:'<path d="M3 12h4M10 12h4M17 12h4"/>',ort:'<path d="M5 5v14h14"/><path d="M5 14h5v5"/>',grid:'<path d="M4 4h16v16H4zM4 9.3h16M4 14.7h16M9.3 4v16M14.7 4v16"/>',undo:'<path d="M9 7L4 12l5 5M4 12h11a4 4 0 010 8h-3"/>',esc:'<path d="M6 6l12 12M18 6L6 18"/>',fit:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',trash:'<path d="M4 7h16M10 7V4h4v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',play:'<path d="M7 4l13 8-13 8z"/>',file:'<path d="M3 7h6l2 2h10v10H3z"/>',save:'<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>',top:'<rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="12" cy="12" r="2"/>',cube:'<path d="M12 3l8 4v10l-8 4-8-4V7zM4 7l8 4 8-4M12 11v10"/>',path:'<path d="M4 18c4-12 8 4 16-12"/>',pencil:'<path d="M4 20l1-5L16 4l4 4L9 19zM14 6l4 4"/>',ruler:'<path d="M3 15l12-12 6 6L9 21zM8 10l2 2M11 7l2 2M5 13l2 2"/>',check:'<path d="M5 12l5 5 9-10"/>',code:'<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/>',copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/>',spiral:'<path d="M5 5c8 0 14 2 14 4s-8 3-14 3 14 2 14 4-6 2-14 2"/>',down:'<path d="M4 5l6 4M10 9v8M10 17l6 3M16 20h4"/>',thread:'<path d="M8 3v18M16 3v18M8 6l8 3M8 11l8 3M8 16l8 3"/>',up:'<path d="M12 20V5M6 11l6-6 6 6"/>',dn:'<path d="M12 4v15M6 13l6 6 6-6"/>',cham:'<path d="M4 20V11l7-7h9"/><path d="M4 20h16" stroke-dasharray="2 3"/>',auxdel:'<path d="M3 12h3M9 12h3" /><path d="M15 9l6 6M21 9l-6 6"/>',zero:'<circle cx="12" cy="12" r="7"/><path d="M12 2v6M12 16v6M2 12h6M16 12h6"/>',list:'<path d="M9 6h11M9 12h11M9 18h11M4 6h1M4 12h1M4 18h1"/>',tool:'<path d="M9 3h6v4l-1 1v13h-4V8L9 7z"/><path d="M10 11l4 2M10 15l4 2"/>',box:'<path d="M3 8l9-4 9 4v8l-9 4-9-4z"/><path d="M3 8l9 4 9-4M12 12v8"/>',plus:'<path d="M12 5v14M5 12h14"/>',back:'<path d="M15 5l-7 7 7 7"/>',edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',calc:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2"/>',contour:'<rect x="8" y="8" width="8" height="8"/><rect x="3" y="3" width="18" height="18" rx="3" stroke-dasharray="3 3"/>',pocket:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 8h10v4H7v4h10"/>',face:'<path d="M3 18h18M5 14h14"/><path d="M8 8h8v4H8zM12 3v5"/>',drill:'<path d="M12 3v9M8 12h8l-4 9z"/>',center:'<path d="M12 3v7M8 10h8l-4 5z"/><path d="M4 20h16"/>',tapt:'<path d="M10 3h4v5h-4zM9 8h6v11l-3 2-3-2z"/><path d="M9 11l6 2M9 15l6 2"/>',camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',image:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="16" cy="9" r="1.5"/>',chamf:'<path d="M4 20V9l5-5h11"/><path d="M4 9h5V4" stroke-dasharray="2 2"/>',stepi:'<path d="M3 20h18M3 20V6h9v7h9v7"/>'};
+var IC={sel:'<path d="M5 3l14 7-6 2-2 6z"/>',line:'<path d="M4 20L20 4"/><circle cx="4" cy="20" r="1.6"/><circle cx="20" cy="4" r="1.6"/>',circ:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="1"/>',ax:'<path d="M2 18L22 6" stroke-dasharray="3 3"/><path d="M12 4v3M12 17v3"/>',trim:'<circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8 16L18 4M16 16L6 4"/>',dim:'<path d="M4 7v10M20 7v10M4 12h16M7 10l-3 2 3 2M17 10l3 2-3 2"/>',eraser:'<path d="M4 16l9-10 7 6-7 8H8zM8 20h12"/>',aux:'<path d="M3 12h4M10 12h4M17 12h4"/>',ort:'<path d="M5 5v14h14"/><path d="M5 14h5v5"/>',grid:'<path d="M4 4h16v16H4zM4 9.3h16M4 14.7h16M9.3 4v16M14.7 4v16"/>',undo:'<path d="M9 7L4 12l5 5M4 12h11a4 4 0 010 8h-3"/>',esc:'<path d="M6 6l12 12M18 6L6 18"/>',fit:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',trash:'<path d="M4 7h16M10 7V4h4v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',play:'<path d="M7 4l13 8-13 8z"/>',file:'<path d="M3 7h6l2 2h10v10H3z"/>',save:'<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>',top:'<rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="12" cy="12" r="2"/>',cube:'<path d="M12 3l8 4v10l-8 4-8-4V7zM4 7l8 4 8-4M12 11v10"/>',path:'<path d="M4 18c4-12 8 4 16-12"/>',pencil:'<path d="M4 20l1-5L16 4l4 4L9 19zM14 6l4 4"/>',ruler:'<path d="M3 15l12-12 6 6L9 21zM8 10l2 2M11 7l2 2M5 13l2 2"/>',check:'<path d="M5 12l5 5 9-10"/>',code:'<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/>',copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/>',spiral:'<path d="M5 5c8 0 14 2 14 4s-8 3-14 3 14 2 14 4-6 2-14 2"/>',down:'<path d="M4 5l6 4M10 9v8M10 17l6 3M16 20h4"/>',thread:'<path d="M8 3v18M16 3v18M8 6l8 3M8 11l8 3M8 16l8 3"/>',up:'<path d="M12 20V5M6 11l6-6 6 6"/>',dn:'<path d="M12 4v15M6 13l6 6 6-6"/>',first:'<path d="M6 5v14M18 6l-8 6 8 6z"/>',prev:'<path d="M15 6l-6 6 6 6"/>',next:'<path d="M9 6l6 6-6 6"/>',cham:'<path d="M4 20V11l7-7h9"/><path d="M4 20h16" stroke-dasharray="2 3"/>',auxdel:'<path d="M3 12h3M9 12h3" /><path d="M15 9l6 6M21 9l-6 6"/>',zero:'<circle cx="12" cy="12" r="7"/><path d="M12 2v6M12 16v6M2 12h6M16 12h6"/>',list:'<path d="M9 6h11M9 12h11M9 18h11M4 6h1M4 12h1M4 18h1"/>',tool:'<path d="M9 3h6v4l-1 1v13h-4V8L9 7z"/><path d="M10 11l4 2M10 15l4 2"/>',box:'<path d="M3 8l9-4 9 4v8l-9 4-9-4z"/><path d="M3 8l9 4 9-4M12 12v8"/>',plus:'<path d="M12 5v14M5 12h14"/>',back:'<path d="M15 5l-7 7 7 7"/>',edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',calc:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2"/>',contour:'<rect x="8" y="8" width="8" height="8"/><rect x="3" y="3" width="18" height="18" rx="3" stroke-dasharray="3 3"/>',pocket:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 8h10v4H7v4h10"/>',face:'<path d="M3 18h18M5 14h14"/><path d="M8 8h8v4H8zM12 3v5"/>',drill:'<path d="M12 3v9M8 12h8l-4 9z"/>',center:'<path d="M12 3v7M8 10h8l-4 5z"/><path d="M4 20h16"/>',tapt:'<path d="M10 3h4v5h-4zM9 8h6v11l-3 2-3-2z"/><path d="M9 11l6 2M9 15l6 2"/>',camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',image:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="16" cy="9" r="1.5"/>',chamf:'<path d="M4 20V9l5-5h11"/><path d="M4 9h5V4" stroke-dasharray="2 2"/>',stepi:'<path d="M3 20h18M3 20V6h9v7h9v7"/>'};
 window.ICON=function(k){return '<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(IC[k]||'')+'</svg>'};
 window.cadZero=function(){return Z0};
 document.querySelectorAll('[data-i]').forEach(function(b){b.insertAdjacentHTML('afterbegin','<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+IC[b.dataset.i]+'</svg>')});
@@ -633,7 +678,7 @@ else sg=O.side==='left'?1:O.side==='right'?-1:0;
 var comp=!!O.comp&&sg!==0,uv=!comp&&sg!==0,xy=closed&&O.side==='out'&&O.ent==='xy'&&uv,dr=uv&&!xy&&P.dr>0?+P.dr:0,sp=closed&&O.ent==='sp'&&!dr,fin=!!O.fin&&uv&&P.alw>0&&!dr;
 var els=closed?startMid(orient(ch,cwD)):(O.rev?ch.els.slice().reverse().map(flip):ch.els);
 var R0=tl.d/2+(uv?P.alw:0),bp=build(els,closed,sg,comp?0:1,R0,P.la,comp),m=[],w=function(s){m.push(s)};
-if(sg){var gg=gouge(build(els,closed,sg,1,tl.d/2+(uv?P.alw:0),P.la,false),els,closed,tl.d/2+(uv?P.alw:0));if(gg)return {err:gougeErr(gg,tl)}}
+if(sg){var gg=gouge(build(els,closed,sg,1,tl.d/2+(uv?P.alw:0),P.la,false),els,closed,tl.d/2+(uv?P.alw:0));if(gg)return {err:gougeErr(gg,tl),tf:1};var Rk=tl.d/2+(uv?P.alw:0),bk=null;els.forEach(function(e){if(!bk&&e.t==='a'&&sg*(e.cw?1:-1)<0&&e.r<=Rk+1e-9)bk=e.r});if(bk!==null)return {err:(closed&&ch.circ?'фреза Ø'+nf(tl.d)+' больше отверстия Ø'+nf(2*bk):'фреза Ø'+nf(tl.d)+' больше радиуса R'+nf(bk)+' на контуре'),tf:1}}
 var cc=sg>0?'G41':'G42',S1=bp.start,A=bp.A,B=bp.B;
 var lin=function(){return comp?'G1 '+cc+' '+XY(S1)+' D'+tl.n+' F#105':'G1 '+XY(S1)+' F#105'};
 var lout=function(){return (comp?'G1 G40 ':'G1 ')+XY(B)};
@@ -646,12 +691,13 @@ xyN=Math.max(1,Math.ceil((XW-alw0)/P.ae-1e-9));var stp=(XW-alw0)/xyN,Rt=tl.d/2,b
 els.forEach(function(e){if(!bad&&e.t==='a'&&sg*(e.cw?1:-1)<0&&e.r<=Rt+XW-stp+1e-9)bad='вогнутая дуга R'+nf(e.r)+' меньше смещения первых проходов — уменьшите съём или обработайте её отдельно'});if(bad)return {err:bad};
 for(var kk=1;kk<=xyN;kk++){var a_=XW-stp*kk,gk=gouge(build(els,closed,sg,1,Rt+a_,P.la,false),els,closed,Rt);if(gk)return {err:'на проходе '+kk+' из '+xyN+' траектория задевает деталь около X'+nf(gk.p[0])+' Y'+nf(gk.p[1])+' — уменьшите съём по XY'}}
 gpar=['#110='+fm(XW)+' (SYOM PO XY'+(P.xw>0?'':' OT ZAGOTOVKI')+')']}
-var par=xy?std(P,tl,{alw:1,fz:1,la:'PODVOD I OTVOD'}).concat(['#111='+fm(P.ae)+' (SHAG PO XY)']):std(P,tl,{dz:sp?'SHAG PO Z NA ODIN KRUG':'SHAG PO Z NA PROHOD',alw:uv,fz:1,la:'PODVOD I OTVOD'}),calc=[];
+var dzX=P.z0-P.z1,recZ=0;if(xy){dzX=P.zx>0?Math.min(+P.zx,P.z0-P.z1):P.z0-P.z1;var kr=P.ae/tl.d;recZ=Math.max(0.5,Math.floor((kr<=0.1?2:kr<=0.25?1.5:kr<=0.5?1:0.5)*tl.d*2)/2)}
+var par=xy?std(Object.assign({},P,{dz:dzX}),tl,{dz:'MAKS GLUBINA ZA PROHOD PO Z',alw:1,fz:1,la:'PODVOD I OTVOD'}).concat(['#111='+fm(P.ae)+' (SHAG PO XY)']):std(P,tl,{dz:sp?'SHAG PO Z NA ODIN KRUG':'SHAG PO Z NA PROHOD',alw:uv,fz:1,la:'PODVOD I OTVOD'}),calc=[];
 if(uv)calc.push('#120=#103/2+#104 (R TRAEKTORII = R FREZY + PRIPUSK)');else if(comp)calc.push('#120=#103/2 (R FREZY DLYA PODVODA)');
-calc=calc.concat(xy?[CHK[0]]:CHK,['IF[#109LE0]THEN#3000=3(PODVOD)']);
+calc=calc.concat(CHK,['IF[#109LE0]THEN#3000=3(PODVOD)']);
 if(uv){var seen={};els.forEach(function(e){if(e.t==='a'&&sg*(e.cw?1:-1)<0){var k=fm(e.r);if(!seen[k]){seen[k]=1;calc.push('IF['+k+'-#120LE0]THEN#3000=4(FREZA BOLSHE RADIUSA)')}}})}
-if(xy)calc.push('IF[#111LE0]THEN#3000=5(SHAG PO XY)','IF[#110LE#104]THEN#3000=6(SYOM PO XY MENSHE PRIPUSKA)','#122=FUP[[#110-#104]/#111] (CHISLO PROHODOV PO XY)','IF[#122LT1]THEN#122=1','#121=[#110-#104]/#122 (FAKTICHESKIJ SHAG PO XY)','IF[#109LT[#121+#103/2+1.]]THEN#109=#121+#103/2+1. (PODVOD VNE MATERIALA)','#120=#103/2+#110-#121 (R PERVOGO PROHODA)');
-if(xy){w('G0 Z[#100+1.]');w('G1 Z#101 F#106 (SRAZU NA POLNUYU GLUBINU)');w('#130=1');w('WHILE[#130LE#122]DO1');w(' #120=#103/2+#110-#121*#130 (SUZHENIE PO XY)');w(' G1 '+XY(A)+' F#105');w(' G1 '+XY(S1));lapLines(bp,false,' ').forEach(w);w(' '+lout());w(' #130=#130+1');w('END1');
+if(xy)calc.push('#119=FUP[[#100-#101]/#102] (CHISLO SLOEV PO Z)','#102=[#100-#101]/#119 (RAVNYE SLOI PO Z)','IF[#111LE0]THEN#3000=5(SHAG PO XY)','IF[#110LE#104]THEN#3000=6(SYOM PO XY MENSHE PRIPUSKA)','#122=FUP[[#110-#104]/#111] (CHISLO PROHODOV PO XY)','IF[#122LT1]THEN#122=1','#121=[#110-#104]/#122 (FAKTICHESKIJ SHAG PO XY)','IF[#109LT[#121+#103/2+1.]]THEN#109=#121+#103/2+1. (PODVOD VNE MATERIALA)','#120=#103/2+#110-#121 (R PERVOGO PROHODA)');
+if(xy){w('G0 Z[#100+1.]');w('#150=#100');w('WHILE[#150GT#101]DO1');w(' #150=#150-#102');w(' IF[#150LT#101]THEN#150=#101');w(' #120=#103/2+#110-#121');w(' G1 '+XY(A)+' F#105');w(' G1 Z#150 F#106');w(' #130=1');w(' WHILE[#130LE#122]DO2');w('  #120=#103/2+#110-#121*#130 (SUZHENIE PO XY)');w('  G1 '+XY(A)+' F#105');w('  G1 '+XY(S1));lapLines(bp,false,'  ').forEach(w);w('  '+lout());w('  #130=#130+1');w(' END2');w('END1');
 if(fin){var bfx=bp.num?build(els,closed,sg,1,tl.d/2,P.la,false):bp;w('(CHISTOVOJ PROHOD)');w('#120=#103/2');w('G1 '+XY(bfx.A)+' F#105');w('G1 '+XY(bfx.start));lapLines(bfx,false,'').forEach(w);w('G1 '+XY(bfx.B))}}
 else if(closed){w('G0 Z[#100+1.]');
 if(sp){w('G1 Z#100 F#106');w(lin());w('(SPIRAL VNIZ I PLOSKIJ KRUG NA DNE)');
@@ -663,9 +709,9 @@ else{w('#150=#100');w('WHILE[#150GT#101]DO1');w(' #150=#150-#102');w(' IF[#150LT
 if(dr)w(' #120=#103/2+#104+[#100-#150]*TAN['+fm(dr)+'] (SKOS STENKI)');w(' G0 '+XY(A));w(' G0 Z[#100+1.]');w(' G1 Z#150 F#106');w(' '+lin());lapLines(bp,false,' ').forEach(w);w(' '+lout());w(' G0 Z[#100+#108]');w('END1');
 if(fin){var bf2=bp.num?build(els,closed,sg,1,tl.d/2,P.la,false):bp;w('(CHISTOVOJ PROHOD NA DNE)');w('#120=#103/2');w('G0 '+XY(bf2.A));w('G0 Z[#100+1.]');w('G1 Z#101 F#106');w('G1 '+XY(bf2.start)+' F#105');lapLines(bf2,false,'').forEach(w);w('G1 '+XY(bf2.B))}}
 var wr=bp.warn.slice();if(closed&&ch.circ&&O.side==='in'){var rp_=ch.r-R0;if(rp_<=0)wr.push('фреза больше отверстия');else if(P.la>=rp_)wr.push('подвод больше радиуса траектории ('+nf(rp_)+')')}
-if(xy){if(P.z0-P.z1>tl.d*2)wr.push('сужение идёт сразу на всю глубину '+nf(P.z0-P.z1)+' мм — это больше 2Ø фрезы');if(P.ae>tl.d*0.5)wr.push('шаг XY больше 0.5Ø фрезы на полной глубине — тяжёлый съём')}
+if(xy){var nzz=Math.max(1,Math.ceil((P.z0-P.z1)/dzX-1e-9)),dzE=(P.z0-P.z1)/nzz;if(dzE>recZ+1e-9)wr.push(P.zx>0?'глубина за проход '+nf(dzE)+' мм больше рекомендуемой '+nf(recZ)+' мм при шаге XY '+nf(P.ae):'вся глубина '+nf(dzE)+' мм за один проход — при шаге XY '+nf(P.ae)+' рекомендую не больше '+nf(recZ)+' мм: впишите «Макс. Z за проход»');if(P.ae>tl.d*0.5)wr.push('шаг XY больше 0.5Ø фрезы — тяжёлый съём')}
 if(closed&&O.side==='in'&&!sp&&!O.pre)wr.push('в точке врезания нужно предварительное отверстие');if(dr){par.push('(SKOS '+nf(dr)+' GRAD: SMESHCHENIE RASTET S GLUBINOJ)');if(P.dz>0.5)wr.push('скос: шаг Z '+nf(P.dz)+' даст заметные ступеньки, лучше 0.2–0.3')}
-var inf;if(xy){nm+=', SUZHENIE PO XY';inf='сужение: '+xyN+' прох. по XY, съём '+nf(XW)+' мм'}
+var inf;if(xy){nm+=', SUZHENIE PO XY';var nz=Math.max(1,Math.ceil((P.z0-P.z1)/dzX-1e-9));inf='сужение: '+xyN+' прох. по XY'+(nz>1?' × '+nz+' по Z (по '+nf((P.z0-P.z1)/nz)+' мм)':'')+', съём '+nf(XW)+' мм · рекомендуемая глубина за проход до '+nf(recZ)+' мм'}
 return {title:nm,par:par,gpar:gpar,calc:calc,mot:m,start:XY(A),warn:wr,info:inf}}
 
 function gThread(ch,P,O,tl){if(!ch.circ)return {err:'резьба делается только по окружности'};
@@ -682,7 +728,7 @@ w(' #134=#124');w(' #135=0');w(' WHILE[#135LT#121]DO2');w('  #134=#134'+pm+'#102
 if(ext)w(' '+LG+' X[#110+#132+#115] Y[#111'+yo+'#115] I#115 J0');else w(' '+G+' X#110 Y#111 I[-#132/2] J0');
 w(' G0 Z[#122+1.]');w(' #130=#130+1');w('END1');
 var h=auto?(ext?0.6134:0.5413)*P.tp:P.th,R=tl.d/2,wr=[],climb=ext?!ccw:ccw;
-if(!ext&&D/2-h-R<=0)wr.push('фреза больше отверстия под резьбу');if(ext&&P.la<=h)wr.push('подвод должен быть больше глубины профиля '+nf(h));
+if(!ext&&D/2-h-R<=0)return {err:'резьбофреза Ø'+nf(tl.d)+' больше отверстия под резьбу',tf:1};if(ext&&P.la<=h)wr.push('подвод должен быть больше глубины профиля '+nf(h));
 if(up&&!ext&&!O.thru)wr.push('снизу вверх: отверстие должно быть глубже Z низ');if(up&&ext)wr.push('снизу вверх: под резьбой нужно место для фрезы');
 return {title:'REZBA '+(ext?'NARUZHNAYA':'VNUTRENNYAYA')+' '+(rh?'PRAVAYA':'LEVAYA')+' M'+nf(D)+'X'+nf(P.tp)+', '+(up?'SNIZU VVERH':'SVERHU VNIZ'),par:par,gpar:gpar,calc:calc,mot:m,start:'X#110 Y#111',warn:wr,info:(rh?'правая':'левая')+', '+(ccw?'G3':'G2')+', '+(climb?'попутное':'встречное')}}
 
@@ -725,7 +771,7 @@ function scanIv(Q,R,y){var xs=[],caps=[],out=[];for(var i=0,j=Q.length-1;i<Q.len
 xs.sort(function(a,b){return a-b});caps.sort(function(a,b){return a[0]-b[0]});var U=[];caps.forEach(function(c){if(U.length&&c[0]<=U[U.length-1][1])U[U.length-1][1]=Math.max(U[U.length-1][1],c[1]);else U.push(c.slice())});
 for(var k=0;k+1<xs.length;k+=2){var a0=xs[k],b0=xs[k+1],segs=[[a0,b0]];U.forEach(function(u){var nx=[];segs.forEach(function(s){if(u[1]<=s[0]||u[0]>=s[1]){nx.push(s);return}if(u[0]>s[0])nx.push([s[0],u[0]]);if(u[1]<s[1])nx.push([u[1],s[1]])});segs=nx});segs.forEach(function(s){if(s[1]-s[0]>0.02)out.push(s)})}
 return out}
-function gPocketCircle(ch,P,O,tl){var m=[],w=function(s){m.push(s)};
+function gPocketCircle(ch,P,O,tl){var m=[],w=function(s){m.push(s)};if(ch.r-tl.d/2-(P.alw>0?+P.alw:0)<=1e-9)return {err:'фреза Ø'+nf(tl.d)+' больше кармана Ø'+nf(2*ch.r),tf:1};
 var par=std(P,tl,{dz:'SHAG PO Z',alw:1,fz:1}).concat(['#113='+fm(P.ae)+' (SHAG PO XY)']),gpar=['#110='+fm(2*ch.r)+' (DIAMETR KARMANA)','#111='+fm(ch.c[0])+' (X CENTRA)','#112='+fm(ch.c[1])+' (Y CENTRA)'];
 var calc=['#120=#103/2+#104 (R FREZY + PRIPUSK)','#121=#110/2-#120 (R POSLEDNEGO KRUGA)','#122=#103*0.25 (R SPIRALI VREZANIYA)','IF[#122GT#121]THEN#122=#121','#123=FUP[#121/#113] (CHISLO KRUGOV)'].concat(CHK,['IF[#121LE0]THEN#3000=3(FREZA BOLSHE KARMANA)','IF[#113LE0]THEN#3000=4(SHAG PO XY)']);
 w('G0 Z[#100+1.]');w('#150=#100');w('WHILE[#150GT#101]DO1');w(' #151=#150');w(' #150=#150-#102');w(' IF[#150LT#101]THEN#150=#101');
@@ -745,8 +791,8 @@ var chains=[];for(;;){var L0=-1,iv=null;for(var l=0;l<lines.length&&!iv;l++){lin
 iv.u=1;var dir=1,c=[{s:[iv.a,iv.y],e:[iv.b,iv.y]}],end=[iv.b,iv.y];
 for(var l2=L0+1;l2<lines.length;l2++){dir=-dir;var best=null,bd=1e18;lines[l2].forEach(function(v){if(v.u)return;var s=dir>0?[v.a,v.y]:[v.b,v.y],d=md(end,s);if(d<bd&&ok(end,s)){bd=d;best=v}});if(!best)break;best.u=1;var s2=dir>0?[best.a,best.y]:[best.b,best.y],e2=dir>0?[best.b,best.y]:[best.a,best.y];c.push({s:s2,e:e2});end=e2}
 chains.push(c)}
-var bp=build(els,true,1,1,Rc,0,false),S1n=bp.pt(bp.start),gg=gouge(bp,els,true,Rc);if(gg)return {err:'фреза Ø'+nf(tl.d)+(P.alw>0?' с припуском '+nf(P.alw):'')+' не проходит в узком месте около X'+nf(gg.p[0])+' Y'+nf(gg.p[1])+' — возьмите фрезу меньше'+(P.alw>0?' или уменьшите припуск':'')};
-if(!chains.length)return {err:'фреза не помещается в карман'};
+var bp=build(els,true,1,1,Rc,0,false),S1n=bp.pt(bp.start),gg=gouge(bp,els,true,Rc);if(gg)return {err:'фреза Ø'+nf(tl.d)+(P.alw>0?' с припуском '+nf(P.alw):'')+' не проходит в узком месте около X'+nf(gg.p[0])+' Y'+nf(gg.p[1])+' — возьмите фрезу меньше'+(P.alw>0?' или уменьшите припуск':''),tf:1};
+if(!chains.length)return {err:'фреза Ø'+nf(tl.d)+' не помещается в карман',tf:1};
 var par=std(P,tl,{dz:'SHAG PO Z',alw:1,fz:1}).concat(['#113='+fm(P.ae||tl.d*0.4)+' (SHAG PO XY)']),calc=['#120=#103/2+#104 (R FREZY + PRIPUSK)','IF[ABS[#103-'+fm(tl.d)+']GT0.001]THEN#3000=5(KARMAN RASSCHITAN DLYA D'+nf(tl.d)+')','IF[ABS[#104-'+fm(P.alw)+']GT0.001]THEN#3000=6(KARMAN RASSCHITAN DLYA PRIPUSKA '+nf(P.alw)+')'].concat(CHK);
 var m=[],w=function(s){m.push(s)},ap=Math.max(0.01,P.dz),Ln=ap/Math.tan(3*Math.PI/180),plunge=false;
 var go=function(cur,p,ind){if(ok(cur,p))w(ind+'G1 '+XYn(p)+' F#105');else{w(ind+'G0 Z[#100+#108]');w(ind+'G0 '+XYn(p));w(ind+'G0 Z[#151+0.5]')}};
@@ -790,12 +836,16 @@ w('  #130=#130+2');w(' END2');w(' G0 Z[#100+#108]');w('END1');
 var wr=[];if(P.la<R)wr.push('выход за край меньше радиуса фрезы — край уступа не дорежется');if(P.ae>tl.d*0.9)wr.push('шаг по ширине больше 0.9 Ø фрезы');
 return {title:'USTUP '+nf(P.w)+'X'+nf(P.z0-P.z1),par:par,calc:calc,mot:m,start:XY(fw.A),warn:wr}}
 var GEN={step:gStep,contour:gContour,pocket:gPocket,face:gFace,holes:gHoles,thread:gThread,chamfer:gChamfer};
-function genOp(op,tl){if(!tl)return {err:'не выбран инструмент'};var P=op.p||{},O=op.o||{};
+function genOp(op,tl){var r=genOp0(op,tl);if(!r.err||!r.tf||!tl||!window.TOOLS||!window.TOOLS.all)return r;
+var c=window.TOOLS.all().filter(function(t){return t.type===tl.type&&t.d<tl.d-1e-9}).sort(function(a,b){return b.d-a.d});
+for(var i=0;i<c.length;i++){var r2=genOp0(op,c[i]);if(!r2.err){op.tool=c[i].n;r2.warn=['T'+tl.n+' Ø'+nf(tl.d)+' не проходит — взята T'+c[i].n+' Ø'+nf(c[i].d)].concat(r2.warn||[]);r2.swapped=1;return r2}}
+r.err+='. Подходящей фрезы меньше в таблице нет — добавьте её на вкладке «Инструмент»';return r}
+function genOp0(op,tl){if(!tl)return {err:'не выбран инструмент'};var P=op.p||{},O=op.o||{};
 if(op.type==='face')return gFace(null,P,O,tl);
 if(op.type==='holes'){var src=O.src||'draw';return gHoles({src:src,pts:op.g&&op.g.pts},P,O,tl)}
 var gs=opGs(op);if(!gs.length)return {err:'выберите геометрию на чертеже'};
 var rs=gs.map(function(g){return GEN[op.type](relCh(g),P,O,tl)}),bad=rs.filter(function(r){return r.err});
-if(bad.length)return {err:(gs.length>1?(rs.indexOf(bad[0])+1)+'-я геометрия: ':'')+bad[0].err};
+if(bad.length)return {err:(gs.length>1?(rs.indexOf(bad[0])+1)+'-я геометрия: ':'')+bad[0].err,tf:bad[0].tf};
 if(rs.length===1)return rs[0];
 var r0=rs[0],mot=r0.mot.slice(),warn=[];
 rs.forEach(function(r,k){(r.warn||[]).forEach(function(s){if(warn.indexOf(s)<0)warn.push(s)});if(!k)return;
@@ -804,7 +854,7 @@ return {title:(op.type==='pocket'?'KARMANY':op.type==='thread'?'REZBY':r0.title)
 function opGs(op){if(op.gs&&op.gs.length)return op.gs;if(op.g&&op.g.els)return [op.g];return []}
 function assemble(ops,prog,getTool){var L=[],warn=[],used=[],gens=[],W=wcsCode(prog&&prog.wcs);
 ops.forEach(function(op,i){var tl=getTool(op.tool),r=genOp(op,tl);gens.push(r);if(r.err){warn.push((i+1)+'. '+r.err);return}if(!used.some(function(u){return u.n===tl.n}))used.push(tl)});
-var nmL=translit(prog.name);L.push('%','O'+String(Math.max(1,Math.min(9999,Math.round(+prog.n||1))))+(nmL?' ('+nmL+')':''));
+var nmL=translit(prog.name).replace(/ /g,'_').slice(0,32)||'PROGRAMMA';L.push('%','<'+nmL+'>');
 used.forEach(function(t){L.push('(T'+t.n+' - '+window.TOOLS.TL[t.type]+' D'+nf(t.d)+(t.type==='tap'?'X'+nf(t.p||1):'')+(t.z&&['mill','face','thread'].indexOf(t.type)>=0?' Z'+t.z:'')+')')});
 L.push('(PRIVYAZKA '+W+')','G21 G90 '+W+' G17 G40 G49 G80');var prev=null;
 ops.forEach(function(op,i){var r=gens[i];if(r.err)return;var tl=getTool(op.tool);
@@ -813,12 +863,12 @@ if(tl.n!==prev){if(prev!==null)L.push('M5');L.push('G91 G28 Z0','G90','T'+tl.n+'
 if(!r.noSpin)L.push('S#107 M3');L.push('G0 G90 '+W+' '+r.start,'G43 H'+tl.n+' Z[#100+#108] M8');r.mot.forEach(function(s){L.push(s)});L.push('G0 Z[#100+#108]','M9','M01');prev=tl.n;
 (r.warn||[]).forEach(function(s){warn.push((i+1)+'. '+s)})});
 L.push('M5','G91 G28 Z0','G28 X0 Y0','G90','M30','%');
-return {code:L.join('\n')+'\n',warn:warn,gens:gens}}
+return {code:L.map(function(s){return s==='%'?s:s+';'}).join('\n')+'\n',warn:warn,gens:gens}}
 
 var IC=function(k){return window.ICON?window.ICON(k):''};
 var TYPES={contour:['Контур','contour','Обход по стенке снаружи, внутри или по линии'],pocket:['Карман','pocket','Выборка внутри замкнутого контура'],face:['Торцовка','face','Снять плоскость заготовки'],holes:['Отверстия','drill','Центровка, сверление, метчик'],thread:['Резьба','thread','Резьбофрезерование по окружности'],chamfer:['Фаска','chamf','Фасочной фрезой по кромке'],step:['Уступ','stepi','Полка вдоль стенки на заданную глубину']};
 var PREF={step:['mill'],chamfer:['chamfer','center'],contour:['mill'],pocket:['mill'],face:['face','mill'],holes:['drill','center','tap'],thread:['thread','mill']};
-var LBL={z0:'Z верх',z1:'Z низ',dz:'Шаг Z',ae:'Шаг XY',alw:'Припуск',f:'Подача F',fz:'F врезания',s:'Обороты S',la:'Подвод',bz:'Безопасный Z',rp:'R над верхом',q:'Вывод Q',tp:'Шаг резьбы P',th:'Профиль h (0=авто)',tq:'Проходов',x0:'X от',x1:'X до',y0:'Y от',y1:'Y до',cx:'X центра',cy:'Y центра',rr:'Радиус',n:'Количество',a0:'Нач. угол °',gx:'X первого',gy:'Y первого',nx:'Кол-во по X',ny:'Кол-во по Y',dx:'Шаг по X',dy:'Шаг по Y',dr:'Скос стенки, °',xw:'Съём XY (0=авто)',w:'Ширина уступа',c:'Фаска, мм',ex:'Заглубление вершины'};
+var LBL={z0:'Z верх',z1:'Z низ',dz:'Шаг Z',ae:'Шаг XY',alw:'Припуск',f:'Подача F',fz:'F врезания',s:'Обороты S',la:'Подвод',bz:'Безопасный Z',rp:'R над верхом',q:'Вывод Q',tp:'Шаг резьбы P',th:'Профиль h (0=авто)',tq:'Проходов',x0:'X от',x1:'X до',y0:'Y от',y1:'Y до',cx:'X центра',cy:'Y центра',rr:'Радиус',n:'Количество',a0:'Нач. угол °',gx:'X первого',gy:'Y первого',nx:'Кол-во по X',ny:'Кол-во по Y',dx:'Шаг по X',dy:'Шаг по Y',dr:'Скос стенки, °',xw:'Съём XY',zx:'Z за проход',w:'Ширина уступа',c:'Фаска, мм',ex:'Заглубление вершины'};
 var OPS=ST.get('ops',[]),PROG=ST.get('prog',{n:1,name:''}),_pm=(PROG.name==='DETAL'&&(PROG.name=''))||(PROG.wcs||(PROG.wcs='G54')),EDI=null,TMR=null,LAST=null;
 function sv(){ST.set('ops',OPS);ST.set('prog',PROG)}
 function stk(){return stockGet()}
@@ -831,7 +881,7 @@ function newOp(type){var s=stk()||{zt:0},zr=s.zt||0,zt=zr>0?0:zr,op={id:Date.now
 op.tool=toolFor(type);
 if(type==='contour')op.o={side:'out',climb:1,comp:0,ent:'sp',fin:0,rev:0};
 if(type==='pocket'){op.p.alw=0.3}
-if(type==='contour'){op.p.dr=0;op.p.xw=0}
+if(type==='contour'){op.p.dr=0;op.p.xw=0;op.p.zx=0}
 if(type==='chamfer'){op.o={side:'out',climb:1,rev:0};op.p.c=0.5;op.p.ex=0.3;op.p.la=3}
 if(type==='step'){op.o={side:'left',rev:0};op.p.w=10;var st0=tget(op.tool);op.p.la=+((st0?st0.d/2:5)+2).toFixed(1)}
 if(type==='face'){var b=s&&s.x1!==undefined?[s.x0,s.y0,s.x1,s.y1]:(dbb()||[0,0,100,50]);op.p.x0=b[0];op.p.y0=b[1];op.p.x1=b[2];op.p.y1=b[3];op.p.z0=zr;op.p.z1=zr>0?0:zr-0.5;op.p.la=3}
@@ -868,13 +918,13 @@ var so=!ch.closed?[['left','Слева'],['right','Справа'],['on','По л
 h+='<div class="lb">'+(ch.closed?'Сторона':'Сторона фрезы по ходу движения')+'</div>'+seg('side',so,o.side);
 if(ch.closed)h+='<div class="lb">Фрезерование</div>'+seg('climb',[['1','Попутное'],['0','Встречное']],o.climb);else h+='<div class="lb">Направление</div>'+seg('rev',[['0','Прямое'],['1','Обратное']],o.rev);
 if(o.side!=='on')h+=sw_('comp','Коррекция G41/G42','выкл. — радиус фрезы в переменной #120',o.comp);
-if(ch.closed){var en=[['sp','Спираль по Z','spiral'],['sd','Проходами по Z','down']];if(o.side==='out'&&!o.comp)en.push(['xy','Сужением по XY','fit']);else if(o.ent==='xy')o.ent='sd';h+='<div class="lb">Как снимать</div>'+seg('ent',en,o.ent);if(o.ent==='xy')h+='<div class="s">Фреза сразу идёт на полную глубину и обходит контур кругами, каждый раз ближе к детали на шаг XY. Первый съём считается от габаритов заготовки.</div>'}
+if(ch.closed){var en=[['sp','Спираль по Z','spiral'],['sd','Проходами по Z','down']];if(o.side==='out'&&!o.comp)en.push(['xy','Сужением по XY','fit']);else if(o.ent==='xy')o.ent='sd';h+='<div class="lb">Как снимать</div>'+seg('ent',en,o.ent);if(o.ent==='xy')h+='<div class="s">Фреза обходит контур кругами, каждый раз ближе к детали на шаг XY. «Z за проход» — сколько максимум снимать по Z за раз (0 — вся глубина сразу). «Съём XY» 0 — считается от габаритов заготовки.</div>'}
 if(o.side!=='on'&&!o.comp)h+=sw_('fin','Чистовой проход на дне','последний круг без припуска',o.fin)}
 if(op.type==='holes'){h+='<div class="lb">Цикл</div>'+seg('cyc',[['81','G81 сверление'],['83','G83 с выводом'],['84','G84 метчик']],o.cyc)}
 if(op.type==='thread'){h+='<div class="lb">Резьба</div>'+seg('tk',[['in','Внутренняя'],['out','Наружная']],o.tk)+'<div class="lb">Виток</div>'+seg('hand',[['R','Правая'],['L','Левая']],o.hand)+'<div class="lb">Ход по Z</div>'+seg('tdir',[['up','Снизу вверх','up'],['dn','Сверху вниз','dn']],o.tdir)+sw_('spr','Зачистной проход','повтор последнего прохода',o.spr)}
 return h}
 function parKeys(op){var t=op.type,o=op.o,uv=o.side!=='on'&&!o.comp;
-if(t==='contour'){if(o.ent==='xy'&&uv&&o.side==='out')return ['z0','z1','xw','ae','alw','f','fz','s','la','bz'];return ['z0','z1','dz'].concat(uv?['alw','dr']:[],['f','fz','s','la','bz'])}
+if(t==='contour'){if(o.ent==='xy'&&uv&&o.side==='out')return ['z0','z1','zx','xw','ae','alw','f','fz','s','la','bz'];return ['z0','z1','dz'].concat(uv?['alw','dr']:[],['f','fz','s','la','bz'])}
 if(t==='chamfer')return ['z0','c','ex','f','s','la','bz'];
 if(t==='step')return ['z0','z1','dz','w','ae','f','fz','s','la','bz'];
 if(t==='pocket')return ['z0','z1','dz','ae','alw','f','fz','s','bz'];
@@ -891,7 +941,7 @@ box.innerHTML='<div class="row" style="align-items:center;margin-top:0"><button 
 '<div class="cd">'+flds(op,parKeys(op))+'<div class="row"><button id="edCalc" data-i="calc">'+IC('calc')+'Режимы по калькулятору</button></div></div>'+
 '<button class="p wide" id="edOk">'+IC('check')+'Готово</button>';
 edPreview();var cv=$('c3'),sd=null;if(cv){cv.onpointerdown=function(e){var r=cv.getBoundingClientRect();sd=[e.clientX-r.left,e.clientY-r.top]};cv.onpointerup=function(e){var r=cv.getBoundingClientRect(),q=[e.clientX-r.left,e.clientY-r.top];if(sd&&Math.hypot(q[0]-sd[0],q[1]-sd[1])<10)edTap(q[0],q[1]);sd=null}}}
-function edPreview(){var op=OPS[EDI];if(!op)return;var tl=tget(op.tool),r=genOp(op,tl),w=$('edW');w.textContent=r.err?r.err:(r.warn||[]).join(' · ');
+function edPreview(){var op=OPS[EDI];if(!op)return;var tl=tget(op.tool),r=genOp(op,tl),w=$('edW');if(r.swapped){sv();edRender();return}w.textContent=r.err?r.err:(r.warn||[]).join(' · ');
 if(r.info)w.textContent=(w.textContent?w.textContent+' · ':'')+r.info;
 var cv=$('c3');if(!cv)return;var dpr=window.devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;if(!W)return;cv.width=W*dpr;cv.height=H*dpr;var c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,W,H);
 var cs=getComputedStyle(document.documentElement),fg=cs.getPropertyValue('--fg')||'#222',D=(window.cadGet?window.cadGet():[]).filter(function(o){return !o.u&&(o.t==='l'||o.t==='c')}),P=[];
@@ -916,11 +966,11 @@ if(!best2)return;toggleG(op,best2);sv();edRender()}
 function roleTag(c){return window.MODELAPI?window.MODELAPI.tag(c):''}
 function openEd(i){EDI=i;$('opView').hidden=true;$('opEd').hidden=false;edRender();window.scrollTo(0,0)}
 function closeEd(){EDI=null;$('opEd').hidden=true;$('opView').hidden=false;$('opEd').innerHTML='';render()}
-function render(){$('pgN').value=PROG.n;$('pgName').value=PROG.name||'';$('pgW').value=PROG.wcs||'G54';var s=stk();['x0','x1','y0','y1','zt','zb'].forEach(function(k){$('sk_'+k).value=s&&s[k]!==undefined?nf(s[k]):''});$('stkSum').textContent=s?nf(s.x1-s.x0)+'×'+nf(s.y1-s.y0)+'×'+nf(s.zt-s.zb):'не задана';
+function render(){$('pgName').value=PROG.name||'';$('pgW').value=PROG.wcs||'G54';var s=stk();['x0','x1','y0','y1','zt','zb'].forEach(function(k){$('sk_'+k).value=s&&s[k]!==undefined?nf(s[k]):''});$('stkSum').textContent=s?nf(s.x1-s.x0)+'×'+nf(s.y1-s.y0)+'×'+nf(s.zt-s.zb):'не задана';
 $('opList').innerHTML=OPS.length?OPS.map(function(op,i){var tl=tget(op.tool),r=genOp(op,tl),bad=r.err;return '<div class="opc'+(bad?' bad':'')+'"><div class="opn">'+(i+1)+'</div><span class="opi">'+IC(TYPES[op.type][1])+'</span><div class="opt" data-oe="'+i+'"><b>'+TYPES[op.type][0]+'</b><small>'+(bad?'⚠ '+r.err:summary(op))+'</small></div><button class="ib" data-ou="'+i+'" aria-label="Выше">'+IC('up')+'</button><button class="ib" data-oe="'+i+'" aria-label="Изменить">'+IC('edit')+'</button></div>'}).join(''):'<div class="cd"><div class="h">Программа пустая</div><div class="s">Нарисуйте деталь на «Чертеже», проверьте инструменты на вкладке «Инструмент» и добавьте операции по порядку: торцовка, контур, карман, отверстия, резьба.</div></div>';
 regen()}
 function regen(){clearTimeout(TMR);TMR=setTimeout(function(){if(!OPS.length){$('out3').value='';$('sumKv').innerHTML='';$('sumW').textContent='';return}
-var a=assemble(OPS,PROG,tget),q=interp(a.code,{stock:stk()}),w=a.warn.slice();LAST=a.code;$('out3').value=a.code;
+var a=assemble(OPS,PROG,tget);if(a.gens.some(function(g){return g.swapped}))sv();var q=interp(a.code,{stock:stk()}),w=a.warn.slice();LAST=a.code;$('out3').value=a.code;
 if(q.err)w.unshift(q.err);if(q.bad.length)w.unshift('G0 ниже верха заготовки: строки '+q.bad.slice(0,6).join(', '));
 OPS.forEach(function(op,i){var tl=tget(op.tool),c=window.TOOLS.calc(tl),p=op.p,m=mach();if(!tl)return;
 if(['contour','pocket'].indexOf(op.type)>=0&&tl.type!=='mill')w.push((i+1)+'. нужна концевая фреза');
@@ -957,9 +1007,9 @@ if(b.id==='go3'){var t4=$('out3').value;if(!t4.trim())return;$('src').value=t4;$
 if(b.id==='lb3'){if(!needName())return;$('m3').textContent=window.libAdd($('out3').value,PROG.name);return}});
 function needName(){var ok=!!String(PROG.name||'').trim();$('pgName').parentNode.classList.toggle('err',!ok);if(!ok){$('m3').textContent='Название — обязательное поле';$('pgName').focus()}return ok}
 root.addEventListener('input',function(e){var t=e.target,d=t.dataset,op=EDI!==null?OPS[EDI]:null,num=function(v){var x=parseFloat(String(v).replace(',','.'));return isNaN(x)?null:x};
-if(d.op&&op){var v=num(t.value);if(v!==null){op.p[d.op]=v;sv();clearTimeout(TMR);TMR=setTimeout(edPreview,200)}return}
+if(d.op&&op){var v=num(t.value);if(v!==null){op.p[d.op]=v;sv();clearTimeout(TMR);TMR=setTimeout(function(){edPreview();regen()},200)}return}
 if(d.ob&&op){op.o[d.ob]=t.checked?1:0;sv();edRender();return}
-if(t.id==='pgN'||t.id==='pgName'||t.id==='pgW'){PROG.n=num($('pgN').value)||1;PROG.name=$('pgName').value;PROG.wcs=$('pgW').value;if(PROG.name.trim())$('pgName').parentNode.classList.remove('err');sv();regen();return}
+if(t.id==='pgName'||t.id==='pgW'){PROG.name=$('pgName').value;PROG.wcs=$('pgW').value;if(PROG.name.trim())$('pgName').parentNode.classList.remove('err');sv();regen();return}
 if(t.id&&t.id.indexOf('sk_')===0){var s={};var okk=true;['x0','x1','y0','y1','zt','zb'].forEach(function(k){var v=num($('sk_'+k).value);if(v===null)okk=false;s[k]=v});if(okk){ST.set('stock',s);$('stkSum').textContent=nf(s.x1-s.x0)+'×'+nf(s.y1-s.y0)+'×'+nf(s.zt-s.zb);regen()}}});
 $('opPick').innerHTML='<div class="tg">'+Object.keys(TYPES).map(function(k){return '<button data-nt="'+k+'">'+IC(TYPES[k][1])+'<b>'+TYPES[k][0]+'</b><small>'+TYPES[k][2]+'</small></button>'}).join('')+'</div>';
 $('pgW').addEventListener('change',function(){PROG.wcs=this.value;sv();regen()});
@@ -973,7 +1023,7 @@ var MD=ST.get('model',null)||{H:20,f:{}};if(!MD.f)MD.f={};if(!MD.e)MD.e={};
 function mdSave(){ST.set('model',MD)}
 var COARSE=[[3,.5],[4,.7],[5,.8],[6,1],[8,1.25],[10,1.5],[12,1.75],[14,2],[16,2],[18,2.5],[20,2.5],[22,2.5],[24,3],[27,3],[30,3.5],[33,3.5],[36,4],[42,4.5],[48,5]];
 function coarse(D){var b=COARSE[0];COARSE.forEach(function(c){if(Math.abs(c[0]-D)<Math.abs(b[0]-D))b=c});return Math.abs(b[0]-D)<=0.6?b[1]:1.5}
-function fkey(ch){return ch.circ?'c:'+nf(2*ch.r):'k:'+chSig(ch)}
+function fkey(ch){if(ch.circ){var k='c:'+nf(2*ch.r);return MD.split&&MD.split[k]?k+'@'+r3(ch.c[0])+','+r3(ch.c[1]):k}return 'k:'+chSig(ch)}
 function r3(v){return Math.round(v*1000)}
 function ekey(e){if(e.full)return 'o:'+r3(e.c[0])+','+r3(e.c[1])+','+r3(e.r);var a=[r3(e.p0[0]),r3(e.p0[1])],b=[r3(e.p1[0]),r3(e.p1[1])],s=[a.join(','),b.join(',')].sort().join('|');return (e.t==='l'?'l:':'a:'+r3(e.c[0])+','+r3(e.c[1])+':')+s}
 function polyArea(Q){var a=0;for(var i=0;i<Q.length;i++){var p=Q[i],q=Q[(i+1)%Q.length];a+=p[0]*q[1]-q[0]*p[1]}return a/2}
@@ -982,10 +1032,10 @@ function features(){var CH=chainsAbs(window.cadGet?window.cadGet():[]).filter(fu
 CH.forEach(function(c){var k=fkey(c);if(!G[k]){G[k]={key:k,chs:[],circ:!!c.circ,D:c.circ?2*c.r:0};L.push(G[k])}G[k].chs.push(c)});
 var big=null,ba=0;CH.forEach(function(c){var a=Math.abs(area(c.els));if(a>ba){ba=a;big=c}});
 var hasPart=L.some(function(f){return MD.f[f.key]&&MD.f[f.key].role==='part'});
-L.forEach(function(f){var s=MD.f[f.key]||{},def;
+L.forEach(function(f){f.base=f.key.split('@')[0];f.split=f.key.indexOf('@')>0;var s=MD.f[f.key]||(f.split?MD.f[f.base]:null)||{},def;
 if(!hasPart&&big&&f.chs.length===1&&f.chs[0]===big)def={role:'part'};else if(f.circ)def=f.D<=20?{role:'hole',through:1,d:10}:{role:'pocket',d:5};else def={role:'pocket',d:5};
 f.role=s.role||def.role;f.d=s.d!==undefined?+s.d:(def.d||5);f.through=s.through!==undefined?+s.through:(def.through||0);f.p=s.p!==undefined?+s.p:coarse(f.D);f.ch=+s.ch||0;f.dr=+s.dr||0;f.mode=s.mode||'all';
-if(f.circ){var c0=rp(f.chs[0].c);f.name='Ø'+nf(f.D)+(f.chs.length>1?' × '+f.chs.length:' · X'+nf(c0[0])+' Y'+nf(c0[1]))}else f.name=chName(f.chs[0])});
+if(f.circ){var c0=rp(f.chs[0].c);f.name='Ø'+nf(f.D)+(f.chs.length>1?' × '+f.chs.length:' · X'+nf(c0[0])+' Y'+nf(c0[1]))+(f.split?' (отдельно)':'')}else f.name=chName(f.chs[0])});
 L.sort(function(a,b){var o={part:0,pocket:1,thread:2,hole:3,none:4};return (o[a.role]-o[b.role])||(a.D-b.D)});
 return L}
 function H_(){return +MD.H>0?+MD.H:20}
@@ -1001,7 +1051,7 @@ else if(op.type==='chamfer'){op.o.side=f.role==='part'?'out':'in';if(f.ch)op.p.c
 else if(op.type==='pocket')op.p.z1=-(f.role==='hole'&&f.through?H+0.5:d);
 else if(op.type==='thread'){op.p.z1=-d;op.p.tp=f.p;op.o.tk='in'}},
 applyStep:function(op,c){if(!MD.touched)return;var k=ekey(c.els[0]),hit=null;features().forEach(function(f){if(f.role==='none')return;edgesOf(f).forEach(function(x){if(x.k===k)hit={f:f,s:edgeSet(k)}})});if(!hit)return;var isP=hit.f.role==='part';op.o.side='left';op.o.rev=isP?1:0;op.p.z0=0;var s=hit.s||{};op.p.z1=-(s.d>0?s.d:Math.min(fdepth(hit.f),5));if(s.st>0)op.p.w=s.st},
-applyHoles:function(op,c){if(!MD.touched)return;var D=window.cadGet().filter(function(o){return o.t==='c'&&o.a0===undefined&&md(o.c,c)<1e-6})[0];if(!D)return;var f=features().filter(function(x){return x.key==='c:'+nf(2*D.r)})[0];if(!f)return;var tl=UIX.tget(op.tool),H=H_();
+applyHoles:function(op,c){if(!MD.touched)return;var D=window.cadGet().filter(function(o){return o.t==='c'&&o.a0===undefined&&md(o.c,c)<1e-6})[0];if(!D)return;var fk=fkey({circ:1,r:D.r,c:D.c}),f=features().filter(function(x){return x.key===fk})[0];if(!f)return;var tl=UIX.tget(op.tool),H=H_();
 op.p.z0=0;if(tl&&tl.type==='center')op.p.z1=-(f.ch?f.D/2+f.ch:1.5);else op.p.z1=-(f.through?H+0.3*(tl?tl.d:D.r*2)+1:Math.min(f.d,H));if(tl&&tl.type==='drill')op.o.cyc=(-op.p.z1>3*tl.d)?'83':'81'},
 auto:autoOps};
 function autoOps(){var F=features(),H=H_(),tools=window.TOOLS.all(),mills=tools.filter(function(t){return t.type==='mill'}).sort(function(a,b){return b.d-a.d}),msg=[],ops=[],st=UIX.stk(),TA=function(a){return Math.tan(a*Math.PI/180)};
@@ -1014,9 +1064,9 @@ var pk={},dfin=[];F.forEach(function(f){if(f.role==='pocket'){var d=Math.min(f.d
 Object.keys(pk).forEach(function(k){var g=pk[k],al=0.3+(g.dr?g.d*TA(g.dr):0),op=tryM('pocket',g.gs,function(o){o.p.z0=0;o.p.z1=-g.d;o.p.alw=+al.toFixed(3)});if(op){ops.push(op);if(g.dr){var fo=mk('contour',UIX.tget(op.tool),function(o){o.gs=g.gs;o.p.z0=0;o.p.z1=-g.d;o.p.alw=0;o.p.dr=g.dr;o.p.dz=0.25;o.o={side:'in',climb:1,comp:0,ent:'sd',fin:0,rev:0,pre:1}});dfin.push(fo)}}
 else g.gs.forEach(function(c){var o1=tryM('pocket',[c],function(o){o.p.z0=0;o.p.z1=-g.d;o.p.alw=+al.toFixed(3)});if(o1)ops.push(o1);else msg.push('нет фрезы для кармана '+chName(c))})});
 ops=ops.concat(dfin);
-var drills=[],cpts=[],cdeep=[],thr=[];
+var drills=[],cpts=[],cdeep=[],thr=[],ctr=tools.filter(function(t){return t.type==='center'})[0];
 F.forEach(function(f){if(f.role!=='hole')return;var dep=f.through?H:Math.min(f.d,H),dr=tools.filter(function(t){return t.type==='drill'&&Math.abs(t.d-f.D)<=0.05})[0];
-if(dr){var pts=f.chs.map(function(c){return c.c});if(f.ch)cdeep.push({pts:pts,z:-(f.D/2+f.ch)});else cpts=cpts.concat(pts);drills.push(mk('holes',dr,function(o){o.o.src='draw';o.g={src:'draw',pts:pts,label:'Ø'+nf(f.D)};o.p.z0=0;o.p.z1=-(f.through?H+0.3*dr.d+1:dep);o.o.cyc=(-o.p.z1>3*dr.d)?'83':'81'}))}
+if(dr){var pts=f.chs.map(function(c){return c.c}),z1d=+(-(f.through?H+0.3*dr.d+1:dep)).toFixed(3),dk=dr.n+'|'+z1d;if(f.ch){if(ctr){var ck=nf(f.D/2+f.ch),cg=cdeep.filter(function(x){return x.k===ck})[0];if(cg)cg.pts=cg.pts.concat(pts);else cdeep.push({k:ck,pts:pts,z:-(f.D/2+f.ch)})}else{cpts=cpts.concat(pts);addCh(f.chs,'in',f.ch)}}else cpts=cpts.concat(pts);var ex_=drills.filter(function(o){return o._k===dk})[0];if(ex_){ex_.g.pts=ex_.g.pts.concat(pts);ex_.g.label='Ø'+nf(f.D)}else{var dop=mk('holes',dr,function(o){o.o.src='draw';o.g={src:'draw',pts:pts,label:'Ø'+nf(f.D)};o.p.z0=0;o.p.z1=z1d;o.o.cyc=(-o.p.z1>3*dr.d)?'83':'81'});dop._k=dk;drills.push(dop)}}
 else{var op=tryM('pocket',f.chs,function(o){o.p.z0=0;o.p.z1=-(f.through?H+0.5:dep);o.p.alw=0.2});if(op){ops.push(op);addCh(f.chs,'in',f.ch)}else msg.push('нет сверла Ø'+nf(f.D)+' и фрезы меньше Ø'+nf(f.D))}});
 F.forEach(function(f){if(f.role!=='thread')return;var P=f.p||1.5,dep=f.through?H:Math.min(f.d,H),mr=f.D/2-0.5413*P;
 var pre=f.chs.map(function(c){return {closed:1,circ:1,r:mr,c:c.c,els:[{t:'a',c:c.c,r:mr,p0:[c.c[0]+mr,c.c[1]],p1:[c.c[0]+mr,c.c[1]],cw:false,full:1}]}});
@@ -1031,7 +1081,7 @@ if(cop){ops.push(cop);if(part.dr)ops.push(mk('contour',UIX.tget(cop.tool),functi
 else msg.push('не назначен контур детали');
 /* single walls and edge chamfers */
 var wall={},ech={},stp={},PQ=part?polyOf(orient(relCh(part.chs[0]),false)):null;
-F.forEach(function(f){if(f.role==='none')return;edgesOf(f).forEach(function(x){var s=edgeSet(x.k);if(!s)return;if(x.e.full){if(s.ch)addCh([x.ch],f.role==='part'?'out':'in',s.ch);if(s.mill)msg.push('фрезеровать окружность целиком — назначьте ей роль');return}
+F.forEach(function(f){if(f.role==='none')return;edgesOf(f).forEach(function(x){var s=edgeSet(x.k);if(!s)return;if(x.e.full){if(s.ch)addCh([x.ch],f.role==='part'?'out':'in',s.ch);if(s.st>0)msg.push('уступ на окружности не делается — назначьте окружности роль «Карман» или нарисуйте уступ отдельным контуром');else if(s.mill)msg.push('фрезеровать окружность целиком — назначьте ей роль');return}
 var isPart=f.role==='part',gch={closed:0,els:[x.e]};
 if(s.mill&&s.st>0){var dS=s.d>0?s.d:Math.min(fdepth(f),5),kS=nf(dS)+'|'+nf(s.st)+(isPart?'p':'c');(stp[kS]=stp[kS]||{d:dS,w:s.st,part:isPart,gs:[]}).gs.push(gch)}
 else if(s.mill&&!(isPart&&part.mode==='all')){var d=s.d>0?s.d:fdepth(f),k=nf(d)+(isPart?'p':'c');(wall[k]=wall[k]||{d:d,part:isPart,gs:[]}).gs.push(gch)}
@@ -1042,8 +1092,8 @@ var op=mk('contour',t,function(o){o.gs=g.gs;o.p.z0=0;o.p.z1=-g.d;o.p.alw=0;o.p.l
 Object.keys(stp).forEach(function(k){var g=stp[k],t=mills[0];if(!t){msg.push('нет фрезы для уступа');return}var op=mk('step',t,function(o){o.gs=g.gs;o.p.z0=0;o.p.z1=-g.d;o.p.w=g.w;o.p.la=+(t.d/2+2).toFixed(1);o.o={side:'left',rev:g.part?1:0}});var r=genOp(op,t);if(r.err)msg.push('уступ: '+r.err);else ops.push(op)});
 Object.keys(ech).forEach(function(k){var g=ech[k];addCh(g.gs,'left',g.c,g.part)});
 ops=ops.concat(chOps);if(needCh)msg.push('для фасок добавьте фасочную фрезу в «Инструмент»');
-if(drills.length){var ct=tools.filter(function(t){return t.type==='center'})[0];if(ct){if(cpts.length)ops.push(mk('holes',ct,function(o){o.o.src='draw';o.g={src:'draw',pts:cpts,label:'все'};o.p.z0=0;o.p.z1=-1.5;o.o.cyc='81'}));cdeep.forEach(function(c){ops.push(mk('holes',ct,function(o){o.o.src='draw';o.g={src:'draw',pts:c.pts,label:'фаска'};o.p.z0=0;o.p.z1=+c.z.toFixed(3);o.o.cyc='81'}))})}ops=ops.concat(drills)}
-ops=ops.concat(thr);if(!mills.length)msg.push('в таблице нет концевых фрез');
+if(drills.length){var ct=tools.filter(function(t){return t.type==='center'})[0];if(!ct&&cpts.length)msg.push('нет центровки — отверстия сверлятся без засверловки');if(ct){if(cpts.length)ops.push(mk('holes',ct,function(o){o.o.src='draw';o.g={src:'draw',pts:cpts,label:'все'};o.p.z0=0;o.p.z1=-1.5;o.o.cyc='81'}));cdeep.forEach(function(c){ops.push(mk('holes',ct,function(o){o.o.src='draw';o.g={src:'draw',pts:c.pts,label:'фаска'};o.p.z0=0;o.p.z1=+c.z.toFixed(3);o.o.cyc='81'}))})}ops=ops.concat(drills)}
+ops=ops.concat(thr);ops.forEach(function(o){delete o._k});if(!mills.length)msg.push('в таблице нет концевых фрез');
 return {ops:ops,msg:msg}}
 /* --- 3D view --- */
 var V3={yaw:-0.55,pit:0.85,zm:1,px:0,py:0},SELK=null,SELE=[],c4=$('c4'),PJ=null,EDG=[];
@@ -1092,16 +1142,18 @@ if(f.role==='pocket')fl='<div class="pg">'+fld3(f,'d','Глубина',f.d)+fld3
 if(f.role==='hole')fl='<div class="pg">'+(f.through?'':fld3(f,'d','Глубина',f.d))+fld3(f,'ch','Фаска',f.ch)+'</div><label class="sw"><span>Сквозное<small>на всю высоту детали</small></span><input type="checkbox" data-mt="'+f.key+'"'+(f.through?' checked':'')+'><i></i></label>';
 if(f.role==='thread')fl='<div class="pg">'+fld3(f,'d','Глубина резьбы',f.d)+fld3(f,'p','Шаг P',f.p)+fld3(f,'ch','Фаска',f.ch)+'</div><label class="sw"><span>Сквозное отверстие<small>резьба на заданную глубину</small></span><input type="checkbox" data-mt="'+f.key+'"'+(f.through?' checked':'')+'><i></i></label>';
 var ex=(f.ch?', фаска '+nf(f.ch):'')+(f.dr?', скос '+nf(f.dr)+'°':''),sm=f.role==='part'?'высота '+nf(H_())+' мм'+(f.mode==='edges'?', только отмеченные стенки':f.mode==='none'?', контур не обрабатывать':'')+ex:f.role==='none'?'не обрабатывается':f.role==='pocket'?'глубина '+nf(f.d)+ex:f.role==='hole'?(f.through?'сквозное':'глубина '+nf(f.d))+ex:'M'+nf(f.D)+'×'+nf(f.p)+', '+(f.through?'сквозное':'глубина '+nf(f.d))+ex;
-return '<div class="opc mdc'+(f.key===SELK?' on':'')+'" style="flex-wrap:wrap" data-msel="'+f.key+'"><span class="opi">'+IC(f.circ?'circ':'contour')+'</span><div class="opt"><b>'+f.name+'</b><small>'+RN[f.role]+' · '+sm+'</small></div><div style="width:100%;display:grid;gap:8px"><div class="seg'+(opts.length>3?' wrap':'')+'">'+opts.map(function(o){return '<button data-mr="'+f.key+'" data-v="'+o[0]+'" class="'+(f.role===o[0]?'on':'')+'">'+o[1]+'</button>'}).join('')+'</div>'+fl+'</div></div>'}).join(''):'<div class="s">Нарисуйте замкнутые контуры и окружности на чертеже.</div>';
+return '<div class="opc mdc'+(f.key===SELK?' on':'')+'" style="flex-wrap:wrap" data-msel="'+f.key+'"><span class="opi">'+IC(f.circ?'circ':'contour')+'</span><div class="opt"><b>'+f.name+'</b><small>'+RN[f.role]+' · '+sm+'</small></div><div style="width:100%;display:grid;gap:8px"><div class="seg'+(opts.length>3?' wrap':'')+'">'+opts.map(function(o){return '<button data-mr="'+f.key+'" data-v="'+o[0]+'" class="'+(f.role===o[0]?'on':'')+'">'+o[1]+'</button>'}).join('')+'</div>'+fl+(f.circ&&f.chs.length>1?'<button data-msplit="'+f.base+'">'+IC('list')+'Настроить каждое отверстие отдельно</button>':'')+(f.split?'<button data-mjoin="'+f.base+'">'+IC('circ')+'Объединить все Ø'+nf(f.D)+'</button>':'')+'</div></div>'}).join(''):'<div class="s">Нарисуйте замкнутые контуры и окружности на чертеже.</div>';
 draw3d()}
 function cur(key){var f=features().filter(function(x){return x.key===key})[0];return f?{role:f.role,d:f.d,through:f.through,p:f.p,ch:f.ch,dr:f.dr,mode:f.mode}:{role:'pocket',d:5}}
 function setF(key,o){var s=MD.f[key]||cur(key);for(var k in o)s[k]=o[k];MD.f[key]=s;MD.touched=1;mdSave()}
-function setE(o){SELE.forEach(function(k){var s=MD.e[k]||{};for(var q in o)s[q]=o[q];if(!s.mill&&!s.ch)delete MD.e[k];else MD.e[k]=s});MD.touched=1;mdSave()}
+function setE(o){SELE.forEach(function(k){var s=MD.e[k]||{};for(var q in o)s[q]=o[q];if(s.st>0)s.mill=1;if(!s.mill&&!s.ch&&!(s.st>0))delete MD.e[k];else MD.e[k]=s});MD.touched=1;mdSave()}
 function mode(m){var d3=m==='3d';$('m2d').hidden=d3;$('m3d').hidden=!d3;[].forEach.call($('cadMode').children,function(b){b.classList.toggle('on',b.dataset.cm===m)});if(d3){if(!MD.touched){MD.touched=1;mdSave()}mdRender()}else if(window.cadRedraw)window.cadRedraw()}
 $('cadMode').addEventListener('click',function(e){var b=e.target.closest('button');if(b)mode(b.dataset.cm)});
 $('m3d').addEventListener('click',function(e){var b=e.target.closest('button');
 if(b&&b.dataset.mr){var F=features();if(b.dataset.v==='part')F.forEach(function(x){if(x.role==='part'&&x.key!==b.dataset.mr)setF(x.key,{role:'pocket'})});setF(b.dataset.mr,{role:b.dataset.v});SELK=b.dataset.mr;mdRender();return}
 if(b&&b.dataset.mm){setF(b.dataset.mm,{mode:b.dataset.v});mdRender();return}
+if(b&&b.dataset.msplit){var bk=b.dataset.msplit,g0=cur(bk);MD.split=MD.split||{};MD.split[bk]=1;MD.f[bk]=g0;features().forEach(function(x){if(x.base===bk&&x.split&&!MD.f[x.key])MD.f[x.key]=JSON.parse(JSON.stringify(g0))});MD.touched=1;mdSave();SELK=null;mdRender();return}
+if(b&&b.dataset.mjoin){var jk=b.dataset.mjoin;if(MD.split)delete MD.split[jk];Object.keys(MD.f).forEach(function(k){if(k.indexOf(jk+'@')===0)delete MD.f[k]});MD.touched=1;mdSave();SELK=null;mdRender();return}
 if(b&&b.id==='m3fit'){V3={yaw:-0.55,pit:0.85,zm:1,px:0,py:0};draw3d();return}
 if(b&&b.id==='meClr'){SELE=[];edgeCard();draw3d();return}
 if(b&&b.id==='meOff'){SELE.forEach(function(k){delete MD.e[k]});mdSave();SELE=[];mdRender();return}
@@ -1109,10 +1161,10 @@ var card=e.target.closest('[data-msel]');if(card&&!e.target.closest('input,label
 $('m3d').addEventListener('input',function(e){var t=e.target,v=parseFloat(String(t.value).replace(',','.'));
 if(t.id==='mdH'){if(v>0){MD.H=v;MD.touched=1;mdSave();draw3d()}return}
 if(t.id==='mdFace'){MD.face=t.checked?1:0;MD.touched=1;mdSave();return}
-if(t.id==='meMill'){var part=features().filter(function(f){return f.role==='part'})[0];setE({mill:t.checked?1:0});if(t.checked&&part&&part.mode==='all'&&SELE.some(function(k){return edgesOf(part).some(function(x){return x.k===k})})){setF(part.key,{mode:'edges'});mdRender();return}draw3d();return}
+if(t.id==='meMill'){var part=features().filter(function(f){return f.role==='part'})[0];setE(t.checked?{mill:1}:{mill:0,st:0});if(!t.checked){var mw=$('meW');if(mw)mw.value=''}if(t.checked&&part&&part.mode==='all'&&SELE.some(function(k){var s_=edgeSet(k);return !(s_&&s_.st>0)&&edgesOf(part).some(function(x){return x.k===k})})){setF(part.key,{mode:'edges'});mdRender();return}draw3d();return}
 if(t.id==='meD'){setE({d:v>0?v:0});return}
 if(t.id==='meC'){if(!isNaN(v)&&v>=0){setE({ch:v});draw3d()}return}
-if(t.id==='meW'){setE({st:v>0?v:0});draw3d();return}
+if(t.id==='meW'){setE({st:v>0?v:0});if(v>0){var mm=$('meMill');if(mm)mm.checked=true}draw3d();return}
 if(t.dataset.mf){if(!isNaN(v)&&v>=0){var o={};o[t.dataset.k]=v;setF(t.dataset.mf,o);draw3d()}return}
 if(t.dataset.mt){setF(t.dataset.mt,{through:t.checked?1:0});mdRender()}});
 var P3=new Map(),l3=0,sd3=null,mv3=false;
