@@ -90,3 +90,8 @@ body.nar main{display:block;max-width:1200px;margin:0 auto}
 #nSheet{overflow-x:hidden}
 #t6 .f,#nSheet .f{min-width:0}
 #t6 .f input,#nSheet .f input{min-width:40px}
+.nrs{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--bd);border-radius:10px;background:var(--bg)}
+.nrs span{flex:1;font-size:14px}
+.nrs b{font-weight:600;color:#1D9E75}
+.nrs button{padding:4px 10px;font-size:13px}
+#nRaises{display:grid;gap:6px}

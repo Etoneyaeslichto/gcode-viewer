@@ -2,6 +2,8 @@
 var $=function(i){return document.getElementById(i)};
 var MN=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 var MNp=['январе','феврале','марте','апреле','мае','июне','июле','августе','сентябре','октябре','ноябре','декабре'];
+var MNr=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+function monr(k){return MNr[+k.slice(5)-1]+' '+k.slice(0,4)}
 var MNg=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
 var SEED=__SEED__;
 var D=ST.get('nar',null);if(!D||!D.parts){D=JSON.parse(JSON.stringify(SEED));ST.set('nar',D)}if(!D.m)D.m={};if(D.premMs===undefined)D.premMs=90;if(D.msK===undefined)D.msK=0.8;
@@ -17,23 +19,25 @@ function rub(v){return (Math.round(v*100)/100).toLocaleString('ru-RU',{minimumFr
 function qs(v){return String(Math.round(v*1000)/1000).replace('.',',')}
 function P(id){for(var i=0;i<D.parts.length;i++)if(D.parts[i].id===id)return D.parts[i];return null}
 function fixed(p){return p.fx!==null&&p.fx!==undefined&&p.fx!==''}
-function price(p){return fixed(p)?+p.fx:(+p.b||0)*D.coef}
+function base(p){return fixed(p)?+p.fx:(+p.b||0)*D.coef}
+function mult(p,k){var f=1;(D.raises||[]).forEach(function(r){if(r.f<=k&&r.f>(p.k||''))f*=1+r.pct/100});return f}
+function price(p,k){return base(p)*mult(p,k||MK)}
 function fac(p){return p.ms?+D.msK:1}
 function M(k,make){if(!D.m[k]&&make)D.m[k]={a:{},p:{}};var m=D.m[k];if(m){m.a=m.a||{};m.p=m.p||{}}return m}
 function bv(x){return x&&typeof x==='object'?+x.n||0:+x||0}
 function bm(x){return !!(x&&typeof x==='object'&&x.ms)}
 function bd(x){return x&&typeof x==='object'?x.d||null:null}
 function today(){var t=new Date();return t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate())}
-function dayEarn(day){var t=1-D.tax/100,r={n:0,c:0};Object.keys(D.m).forEach(function(k){var m=M(k);['a','p'].forEach(function(h){for(var id in m[h]){var p=P(id);if(!p)continue;m[h][id].forEach(function(x){if(bd(x)!==day)return;var g=price(p)*bv(x)*(bm(x)?+D.msK:1)*t;r.n+=g*(1+(bm(x)?D.premMs:D.prem)/100);r.c+=bv(x)})}})});return r}
+function dayEarn(day){var t=1-D.tax/100,r={n:0,c:0};Object.keys(D.m).forEach(function(k){var m=M(k);['a','p'].forEach(function(h){for(var id in m[h]){var p=P(id);if(!p)continue;m[h][id].forEach(function(x){if(bd(x)!==day)return;var g=price(p,k)*bv(x)*(bm(x)?+D.msK:1)*t;r.n+=g*(1+(bm(x)?D.premMs:D.prem)/100);r.c+=bv(x)})}})});return r}
 function sum(a){var s=0;(a||[]).forEach(function(x){s+=bv(x)});return s}
 function sumM(a,ms){var s=0;(a||[]).forEach(function(x){if(bm(x)===ms)s+=bv(x)});return s}
-function bgross(p,a){var s=0;(a||[]).forEach(function(x){s+=price(p)*bv(x)*(bm(x)?+D.msK:1)});return s}
+function bgross(p,a,k){var s=0;(a||[]).forEach(function(x){s+=price(p,k)*bv(x)*(bm(x)?+D.msK:1)});return s}
 if(!D.bm){D.parts.forEach(function(p){if(!p.ms)return;Object.keys(D.m).forEach(function(k){['a','p'].forEach(function(h){var a=D.m[k][h]&&D.m[k][h][p.id];if(a)D.m[k][h][p.id]=a.map(function(x){return bm(x)?x:{n:bv(x),ms:1}})})})});D.bm=1;ST.set('nar',D)}
 function q(k,h,id){var m=M(k);return m?sum(m[h][id]):0}
-function gross(k,h){var m=M(k),s=0;if(!m)return 0;for(var id in m[h]){var p=P(id);if(p)s+=bgross(p,m[h][id])}return s}
+function gross(k,h){var m=M(k),s=0;if(!m)return 0;for(var id in m[h]){var p=P(id);if(p)s+=bgross(p,m[h][id],k)}return s}
 function cnt(k,h){var m=M(k),s=0;if(!m)return 0;for(var id in m[h])if(P(id))s+=sum(m[h][id]);return s}
 function has(k){return cnt(k,'a')+cnt(k,'p')>0}
-function calc(k){var t=1-D.tax/100,r={ga:0,gp:0,pr:0,prm:0},m=M(k);if(m)['a','p'].forEach(function(h){for(var id in m[h]){var p=P(id);if(!p)continue;m[h][id].forEach(function(x){var g=price(p)*bv(x)*(bm(x)?+D.msK:1),pr=g*t*(bm(x)?D.premMs:D.prem)/100;r['g'+h]+=g;r.pr+=pr;if(bm(x))r.prm+=pr})}});r.na=r.ga*t;r.np=r.gp*t;r.g=r.ga+r.gp;r.n=r.na+r.np;return r}
+function calc(k){var t=1-D.tax/100,r={ga:0,gp:0,pr:0,prm:0},m=M(k);if(m)['a','p'].forEach(function(h){for(var id in m[h]){var p=P(id);if(!p)continue;m[h][id].forEach(function(x){var g=price(p,k)*bv(x)*(bm(x)?+D.msK:1),pr=g*t*(bm(x)?D.premMs:D.prem)/100;r['g'+h]+=g;r.pr+=pr;if(bm(x))r.prm+=pr})}});r.na=r.ga*t;r.np=r.gp*t;r.g=r.ga+r.gp;r.n=r.na+r.np;return r}
 function prevPrem(k){var m=M(k);if(m&&m.ppo!==null&&m.ppo!==undefined)return {v:+m.ppo,man:1};var pk=shift(k,-1);return {v:has(pk)?calc(pk).pr:0,man:0}}
 /* ---------- render ---------- */
 function render(){$('nMon').textContent=mon(MK);var c=calc(MK),pp=prevPrem(MK),tot=c.n+pp.v,pk=shift(MK,-1),nk=shift(MK,1);
@@ -44,7 +48,7 @@ $('nGr').innerHTML=cell('Сегодня заработано',rub(td.n),td.c>0?'
 cell('Наряды за месяц',rub(c.g),'после налога '+rub(c.n))+cell('Премия за этот месяц',rub(c.pr),'придёт в '+MNp[+nk.slice(5)-1]+(c.prm>0?' · из неё многостаночка '+rub(c.prm):''),'acc')+
 '<div><small>Премия за '+monl(pk)+'</small><b>'+rub(pp.v)+'</b><i>'+(pp.man?'вписана вручную':'из нарядов за '+monl(pk))+' · <button class="lnk" id="nPPed">изменить</button></i></div>'+
 cell('Наряды + премия',rub(c.n+c.pr),'после налога, этого месяца');
-$('nPPed').onclick=openPP;
+$('nPPed').onclick=openPP;renderRaises();
 [].forEach.call($('nHalf').children,function(b){b.classList.toggle('on',b.dataset.h===HALF)});$('nOnly').classList.toggle('on',ONLY);$('nOnly').classList.toggle('p',ONLY);
 $('nCoef').value=String(D.coef).replace('.',',');$('nTax').value=String(D.tax).replace('.',',');$('nPrem').value=String(D.prem).replace('.',',');$('nPremMs').value=String(D.premMs).replace('.',',');$('nMsK').value=String(D.msK).replace('.',',');
 list()}
@@ -62,7 +66,7 @@ function close(){var sb=$('nSetBox');if(sb&&sb.parentNode!==$('nSetHold'))$('nSe
 function openPart(id){var p=P(id);if(!p)return;
 if(MSNEW.id!==id)MSNEW={id:id,on:!!p.ms};
 var blk=function(h){var a=(M(MK)||{a:{},p:{}})[h][id]||[],n=sum(a),nm=sumM(a,true);return '<div class="nbk'+(h===HALF?' cur':'')+'"><div class="tt"><b>'+HN[h]+'</b><span>'+qs(n)+' шт'+(nm>0?' (МС '+qs(nm)+')':'')+' · '+rub(bgross(p,a))+'</span></div>'+(a.length?'<div class="nbat">'+a.map(function(v,i){return '<span'+(bm(v)?' class="ms"':'')+'><button class="tg" data-tg="'+h+':'+i+'" title="Нажмите, чтобы переключить многостаночку">'+qs(bv(v))+(bm(v)?' МС':'')+'</button><button data-del="'+h+':'+i+'" aria-label="Убрать">✕</button></span>'}).join('')+'</div>':'')+'<div class="nadd"><label class="f"><span>Добавить</span><input id="nIn_'+h+'" inputmode="decimal" placeholder="шт"></label><button class="p" data-add="'+h+'">+</button></div></div>'};
-var s=sheet('<div class="hd"><div><b>'+esc(p.dw||'без номера')+'</b><small>'+esc(p.nm||'')+'</small><small>'+(fixed(p)?'конечная цена '+rub(price(p))+' (своя)':'цена '+String(p.b||0).replace('.',',')+' × '+String(D.coef).replace('.',',')+' = '+rub(price(p)))+'</small></div><button class="ib" id="nX" aria-label="Закрыть">✕</button></div><label class="sw"><span>Многостаночка<small>для новых партий: сумма ×'+String(D.msK).replace('.',',')+', премия '+D.premMs+'%</small></span><input type="checkbox" id="nMsNew"'+(MSNEW.on?' checked':'')+'><i></i></label>'+blk('a')+blk('p')+drBlock(p)+'<div class="s">Количество за '+mon(MK).toLowerCase()+'. Каждое добавление — отдельная партия: нажмите на партию, чтобы отметить или снять «МС», лишнюю уберите крестиком.</div><div class="row" style="margin:0"><button id="nEd">Изменить деталь</button></div>');
+var s=sheet('<div class="hd"><div><b>'+esc(p.dw||'без номера')+'</b><small>'+esc(p.nm||'')+'</small><small>'+(fixed(p)?'конечная цена '+rub(price(p))+' (своя)':'цена '+String(p.b||0).replace('.',',')+' × '+String(D.coef).replace('.',',')+' = '+rub(base(p))+(mult(p,MK)!==1?' → с повышением '+rub(price(p)):''))+'</small></div><button class="ib" id="nX" aria-label="Закрыть">✕</button></div><label class="sw"><span>Многостаночка<small>для новых партий: сумма ×'+String(D.msK).replace('.',',')+', премия '+D.premMs+'%</small></span><input type="checkbox" id="nMsNew"'+(MSNEW.on?' checked':'')+'><i></i></label>'+blk('a')+blk('p')+drBlock(p)+'<div class="s">Количество за '+mon(MK).toLowerCase()+'. Каждое добавление — отдельная партия: нажмите на партию, чтобы отметить или снять «МС», лишнюю уберите крестиком.</div><div class="row" style="margin:0"><button id="nEd">Изменить деталь</button></div>');
 $('nX').onclick=close;$('nEd').onclick=function(){openForm(id)};$('nMsNew').onchange=function(){MSNEW.on=this.checked};
 s.addEventListener('click',function(e){var th=e.target.closest('[data-dr]');if(th){view(id,th.dataset.dr);return}var b=e.target.closest('button');if(!b)return;
 if(b.dataset.add){var h=b.dataset.add,v=num($('nIn_'+h).value);if(!(v>0))return;var m=M(MK,1);var nb={n:v,d:today()};if(MSNEW.on)nb.ms=1;(m[h][id]=m[h][id]||[]).push(nb);sv();render();openPart(id)}
@@ -82,9 +86,10 @@ var pv=function(){var on=$('fFxOn').checked,b=num($('fB').value)||0,f=num($('fFx
 ['fB','fFx'].forEach(function(i){$(i).addEventListener('input',pv)});$('fFxOn').addEventListener('change',pv);pv();
 $('nX').onclick=close;
 $('fOk').onclick=function(){var dw=$('fDw').value.trim(),nm=$('fNm').value.trim();if(!dw&&!nm){$('fPv').textContent='Впишите номер по чертежу или название';return}
-var o=id?P(id):{id:'p'+Date.now().toString(36)};o.dw=dw;o.nm=nm;o.b=num($('fB').value);o.fx=$('fFxOn').checked?num($('fFx').value):null;o.ms=$('fMs').checked?1:0;if(!id)D.parts.unshift(o);sv();render();if(id)openPart(id);else close()};
+var o=id?P(id):{id:'p'+Date.now().toString(36)},ob=o.b,ofx=o.fx;o.dw=dw;o.nm=nm;o.b=num($('fB').value);o.fx=$('fFxOn').checked?num($('fFx').value):null;o.ms=$('fMs').checked?1:0;if(!id||o.b!==ob||o.fx!==ofx)o.k=MK;if(!id)D.parts.unshift(o);sv();render();if(id)openPart(id);else close()};
 if(id)$('fDel').onclick=function(){var b=this;if(!b.classList.contains('arm')){b.classList.add('arm');b.textContent='Точно удалить? Нажмите ещё раз';return}
 (P(id).dr||[]).forEach(function(x){FS.del(x.id)});D.parts=D.parts.filter(function(x){return x.id!==id});Object.keys(D.m).forEach(function(k){delete D.m[k].a[id];delete D.m[k].p[id]});sv();close();render()}}
+function renderRaises(){var L=D.raises||[];$('nRaises').innerHTML=L.length?L.map(function(x,i){return '<div class="nrs"><span>с '+monr(x.f)+'</span><b>+'+String(x.pct).replace('.',',')+'%</b><button data-rdel="'+i+'" aria-label="Отменить повышение">✕</button></div>'}).join(''):'<div class="s">Повышений не было</div>';$('nRhint').textContent='Цены всех деталей вырастут начиная с '+monr(MK)+' (открытый месяц). Прошлые месяцы не изменятся.'}
 function openPP(){var m=M(MK),pk=shift(MK,-1),auto=has(pk)?calc(pk).pr:0;
 sheet('<div class="hd"><div><b>Премия за '+monl(pk)+'</b><small>приходит в '+mon(MK).toLowerCase()+'</small></div><button class="ib" id="nX" aria-label="Закрыть">✕</button></div><div class="s">Автоматически: '+D.prem+'% (многостаночка '+D.premMs+'% от суммы ×'+String(D.msK).replace('.',',')+') от нарядов за '+monl(pk)+' после налога = '+rub(auto)+(has(pk)?'':' (за '+monl(pk)+' в приложении нет записей)')+'. Если пришло другое число — впишите его.</div><label class="f"><span>Сумма премии</span><input id="ppV" inputmode="decimal" value="'+(m&&m.ppo!=null?String(m.ppo).replace('.',','):'')+'" placeholder="'+String(Math.round(auto*100)/100).replace('.',',')+'"></label><div class="row" style="margin:0"><button class="p" id="ppOk">Сохранить</button><button id="ppAuto">Считать автоматически</button></div>');
 $('nX').onclick=close;$('ppOk').onclick=function(){var v=num($('ppV').value);var mm=M(MK,1);if(v===null)delete mm.ppo;else mm.ppo=v;sv();close();render()};
@@ -142,6 +147,8 @@ $('nImp').onchange=function(){var f=this.files[0];this.value='';if(!f)return;var
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&SH)close()});
 window.NAR={calc:calc,prevPrem:prevPrem,data:function(){return D}};
 var filled=Object.keys(D.m).filter(has).sort();if(filled.length)MK=filled[filled.length-1];
+$('nRadd').onclick=function(){var v=num($('nRpct').value);if(!(v>0))return;(D.raises=D.raises||[]).push({f:MK,pct:v});D.raises.sort(function(a,b){return a.f<b.f?-1:1});$('nRpct').value='';sv();render()};
+$('nRaises').onclick=function(e){var b=e.target.closest('[data-rdel]');if(!b)return;if(!b.classList.contains('arm')){b.classList.add('arm');b.textContent='Отменить?';return}D.raises.splice(+b.dataset.rdel,1);sv();render()};
 $('nGear').onclick=function(){var s=sheet('<div class="hd"><div><b>Настройки</b><small>расчёт, резервная копия, обновления</small></div><button class="ib" id="nX" aria-label="Закрыть">✕</button></div>');s.appendChild($('nSetBox'));$('nX').onclick=close};
 $('t6').hidden=false;render();
 })();
