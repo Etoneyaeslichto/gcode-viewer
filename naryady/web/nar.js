@@ -33,8 +33,7 @@ var cell=function(t,v,s,cls){return '<div'+(cls?' class="'+cls+'"':'')+'><small>
 $('nGr').innerHTML=cell('Аванс',rub(c.ga),'чистыми '+rub(c.na))+cell('Получка',rub(c.gp),'чистыми '+rub(c.np))+
 cell('Наряды за месяц',rub(c.g),'после налога '+rub(c.n))+cell('Премия '+D.prem+'% за этот месяц',rub(c.pr),'придёт в '+MNp[+nk.slice(5)-1],'acc')+
 '<div><small>Премия за '+monl(pk)+'</small><b>'+rub(pp.v)+'</b><i>'+(pp.man?'вписана вручную':'из нарядов за '+monl(pk))+' · <button class="lnk" id="nPPed">изменить</button></i></div>'+
-cell('Наряды + премия',rub(c.n+c.pr),'после налога, этого месяца')+
-cell('Сделано деталей',qs(cnt(MK,'a')+cnt(MK,'p'))+' шт','аванс '+qs(cnt(MK,'a'))+' · получка '+qs(cnt(MK,'p')),'wide');
+cell('Наряды + премия',rub(c.n+c.pr),'после налога, этого месяца');
 $('nPPed').onclick=openPP;
 [].forEach.call($('nHalf').children,function(b){b.classList.toggle('on',b.dataset.h===HALF)});$('nOnly').classList.toggle('on',ONLY);$('nOnly').classList.toggle('p',ONLY);
 $('nCoef').value=String(D.coef).replace('.',',');$('nTax').value=String(D.tax).replace('.',',');$('nPrem').value=String(D.prem).replace('.',',');
@@ -78,8 +77,8 @@ $('nX').onclick=close;$('ppOk').onclick=function(){var v=num($('ppV').value);var
 $('ppAuto').onclick=function(){var mm=M(MK);if(mm)delete mm.ppo;sv();close();render()}}
 /* ---------- send ---------- */
 function sendText(h){var m=M(MK)||{a:{},p:{}},rows=[];D.parts.forEach(function(p){var n=sum(m[h][p.id]);if(n>0)rows.push({p:p,n:n})});
-if(!rows.length)return null;var tot=0;rows.forEach(function(r){tot+=r.n});
-return 'Наряды на '+(h==='a'?'аванс':'получку')+', '+mon(MK).toLowerCase()+'\n'+rows.map(function(r,i){return (i+1)+'. '+(r.p.dw||'')+(r.p.nm?' ('+r.p.nm+')':'')+' — '+qs(r.n)+' шт'}).join('\n')+'\nВсего: '+qs(tot)+' шт'}
+if(!rows.length)return null;
+return rows.map(function(r){return (r.p.dw||'')+(r.p.nm?' ('+r.p.nm+')':'')+' — '+qs(r.n)+' шт'}).join('\n')}
 function copy(t,cb){var done=function(ok){cb(ok)};try{if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(t).then(function(){done(true)},function(){done(fb())});return}}catch(e){}done(fb());
 function fb(){try{var ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();ta.setSelectionRange(0,t.length);var ok=document.execCommand('copy');ta.remove();return ok}catch(e){return false}}}
 function openSend(){var s=sheet('<div class="hd"><div><b>Отправить наряды</b><small>'+mon(MK)+'</small></div><button class="ib" id="nX" aria-label="Закрыть">✕</button></div><div class="seg" id="sdH"><button data-h="a">На аванс</button><button data-h="p">На получку</button></div><textarea id="sdT" readonly style="height:220px"></textarea><div class="row" style="margin:0"><button class="p" id="sdCp">Скопировать</button><button id="sdSh" hidden>Поделиться…</button></div><div class="s" id="sdM"></div>');
