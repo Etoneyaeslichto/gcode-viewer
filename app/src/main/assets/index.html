@@ -724,7 +724,7 @@ function gContour(ch,P,O,tl){
 var closed=!!ch.closed,cwD=null,sg;
 if(closed){cwD=((O.side!=='in')===!!O.climb);sg=O.side==='on'?0:(cwD===(O.side==='out')?1:-1)}
 else sg=O.side==='left'?1:O.side==='right'?-1:0;
-var comp=!!O.comp&&sg!==0,uv=!comp&&sg!==0,xy=closed&&O.side==='out'&&O.ent==='xy'&&uv,dr=uv&&!xy&&P.dr>0?+P.dr:0,sp=closed&&O.ent==='sp'&&!dr,fin=!!O.fin&&uv&&P.alw>0&&!dr;
+var comp=!!O.comp&&sg!==0,uv=!comp&&sg!==0,xy=O.ent==='xy'&&uv&&(!closed||O.side==='out'),dr=uv&&!xy&&P.dr>0?+P.dr:0,sp=closed&&O.ent==='sp'&&!dr,fin=!!O.fin&&uv&&P.alw>0&&!dr;
 var els=closed?startMid(orient(ch,cwD)):(O.rev?ch.els.slice().reverse().map(flip):ch.els);
 var R0=tl.d/2+(uv?P.alw:0),bp=build(els,closed,sg,comp?0:1,R0,P.la,comp),m=[],w=function(s){m.push(s)};
 if(sg){var gg=gouge(build(els,closed,sg,1,tl.d/2+(uv?P.alw:0),P.la,false),els,closed,tl.d/2+(uv?P.alw:0));if(gg)return {err:gougeErr(gg,tl),tf:1};var Rk=tl.d/2+(uv?P.alw:0),bk=null;els.forEach(function(e){if(!bk&&e.t==='a'&&sg*(e.cw?1:-1)<0&&e.r<=Rk+1e-9)bk=e.r});if(bk!==null)return {err:(closed&&ch.circ?'фреза Ø'+nf(tl.d)+' больше отверстия Ø'+nf(2*bk):'фреза Ø'+nf(tl.d)+' больше радиуса R'+nf(bk)+' на контуре'),tf:1}}
@@ -733,8 +733,10 @@ var lin=function(){return comp?'G1 '+cc+' '+XY(S1)+' D'+tl.n+' F#105':'G1 '+XY(S
 var lout=function(){return (comp?'G1 G40 ':'G1 ')+XY(B)};
 var nm=closed?(ch.circ?(O.side==='in'?'RASFREZEROVKA OTVERSTIYA':O.side==='out'?'OBKATKA PO KRUGU':'PO OKRUZHNOSTI'):(O.side==='in'?'KONTUR VNUTRI':O.side==='out'?'KONTUR SNARUZHI':'PO KONTURU')):(sg>0?'OTKRYTYJ KONTUR, FREZA SLEVA':sg<0?'OTKRYTYJ KONTUR, FREZA SPRAVA':'OTKRYTYJ KONTUR PO LINII');
 var XW=0,xyN=1,gpar;if(xy){var Qp=polyOf(els),st=typeof stockGet==='function'?stockGet():null;XW=P.xw>0?+P.xw:0;
-if(!XW){if(!st||st.x1===undefined)return {err:'для обкатки сужением задайте заготовку (блок «Заготовка») или съём по XY'};var pts=[];[[st.x0,st.y0,st.x1,st.y0],[st.x1,st.y0,st.x1,st.y1],[st.x1,st.y1,st.x0,st.y1],[st.x0,st.y1,st.x0,st.y0]].forEach(function(s){for(var k=0;k<=200;k++)pts.push([s[0]+(s[2]-s[0])*k/200,s[1]+(s[3]-s[1])*k/200])});
-pts.forEach(function(p){if(!inPoly(p,Qp)){var d=dPoly(p,Qp);if(d>XW)XW=d}});XW=Math.ceil(XW*10-1e-6)/10;if(!(XW>0))return {err:'заготовка не больше контура — снимать по XY нечего'}}
+if(!XW){if(!st||st.x1===undefined)return {err:'для сужения по XY задайте заготовку (блок «Заготовка») или съём по XY'};var pts=[];[[st.x0,st.y0,st.x1,st.y0],[st.x1,st.y0,st.x1,st.y1],[st.x1,st.y1,st.x0,st.y1],[st.x0,st.y1,st.x0,st.y0]].forEach(function(s){for(var k=0;k<=200;k++)pts.push([s[0]+(s[2]-s[0])*k/200,s[1]+(s[3]-s[1])*k/200])});
+if(closed)pts.forEach(function(p){if(!inPoly(p,Qp)){var d=dPoly(p,Qp);if(d>XW)XW=d}});
+else{var Ql=Qp.concat([els[els.length-1].p1]);pts.forEach(function(p){var bd=1e18,bs=0;for(var i=1;i<Ql.length;i++){var a=Ql[i-1],b=Ql[i],dx=b[0]-a[0],dy=b[1]-a[1],L=dx*dx+dy*dy;if(!L)continue;var t=((p[0]-a[0])*dx+(p[1]-a[1])*dy)/L;if(t<=1e-6||t>=1-1e-6)continue;var qx=a[0]+t*dx,qy=a[1]+t*dy,d=Math.hypot(p[0]-qx,p[1]-qy);if(d<bd){bd=d;bs=dx*(p[1]-a[1])-dy*(p[0]-a[0])}}if(bd<1e17&&bs*sg>0&&bd>XW)XW=bd})}
+XW=Math.ceil(XW*10-1e-6)/10;if(!(XW>0))return {err:closed?'заготовка не больше контура — снимать по XY нечего':'со стороны фрезы заготовки нет — впишите «Съём XY» вручную'}}
 var alw0=P.alw>0?+P.alw:0;if(XW<=alw0)return {err:'съём по XY меньше припуска'};if(!(P.ae>0))return {err:'задайте шаг XY'};
 xyN=Math.max(1,Math.ceil((XW-alw0)/P.ae-1e-9));var stp=(XW-alw0)/xyN,Rt=tl.d/2,bad=null;
 els.forEach(function(e){if(!bad&&e.t==='a'&&sg*(e.cw?1:-1)<0&&e.r<=Rt+XW-stp+1e-9)bad='вогнутая дуга R'+nf(e.r)+' меньше смещения первых проходов — уменьшите съём или обработайте её отдельно'});if(bad)return {err:bad};
@@ -746,8 +748,10 @@ if(uv)calc.push('#120=#103/2+#104 (R TRAEKTORII = R FREZY + PRIPUSK)');else if(c
 calc=calc.concat(CHK,['IF[#109LE0]THEN#3000=3(PODVOD)']);
 if(uv){var seen={};els.forEach(function(e){if(e.t==='a'&&sg*(e.cw?1:-1)<0){var k=fm(e.r);if(!seen[k]){seen[k]=1;calc.push('IF['+k+'-#120LE0]THEN#3000=4(FREZA BOLSHE RADIUSA)')}}})}
 if(xy)calc.push('#119=FUP[[#100-#101]/#102] (CHISLO SLOEV PO Z)','#102=[#100-#101]/#119 (RAVNYE SLOI PO Z)','IF[#111LE0]THEN#3000=5(SHAG PO XY)','IF[#110LE#104]THEN#3000=6(SYOM PO XY MENSHE PRIPUSKA)','#122=FUP[[#110-#104]/#111] (CHISLO PROHODOV PO XY)','IF[#122LT1]THEN#122=1','#121=[#110-#104]/#122 (FAKTICHESKIJ SHAG PO XY)','IF[#109LT[#121+#103/2+1.]]THEN#109=#121+#103/2+1. (PODVOD VNE MATERIALA)','#120=#103/2+#110-#121 (R PERVOGO PROHODA)');
-if(xy){w('G0 Z[#100+1.]');w('#150=#100');w('WHILE[#150GT#101]DO1');w(' #150=#150-#102');w(' IF[#150LT#101]THEN#150=#101');w(' #120=#103/2+#110-#121');w(' G1 '+XY(A)+' F#105');w(' G1 Z#150 F#106');w(' #130=1');w(' WHILE[#130LE#122]DO2');w('  #120=#103/2+#110-#121*#130 (SUZHENIE PO XY)');w('  G1 '+XY(A)+' F#105');w('  G1 '+XY(S1));lapLines(bp,false,'  ').forEach(w);w('  '+lout());w('  #130=#130+1');w(' END2');w('END1');
+if(xy&&closed){w('G0 Z[#100+1.]');w('#150=#100');w('WHILE[#150GT#101]DO1');w(' #150=#150-#102');w(' IF[#150LT#101]THEN#150=#101');w(' #120=#103/2+#110-#121');w(' G1 '+XY(A)+' F#105');w(' G1 Z#150 F#106');w(' #130=1');w(' WHILE[#130LE#122]DO2');w('  #120=#103/2+#110-#121*#130 (SUZHENIE PO XY)');w('  G1 '+XY(A)+' F#105');w('  G1 '+XY(S1));lapLines(bp,false,'  ').forEach(w);w('  '+lout());w('  #130=#130+1');w(' END2');w('END1');
 if(fin){var bfx=bp.num?build(els,closed,sg,1,tl.d/2,P.la,false):bp;w('(CHISTOVOJ PROHOD)');w('#120=#103/2');w('G1 '+XY(bfx.A)+' F#105');w('G1 '+XY(bfx.start));lapLines(bfx,false,'').forEach(w);w('G1 '+XY(bfx.B))}}
+else if(xy){w('#150=#100');w('WHILE[#150GT#101]DO1');w(' #150=#150-#102');w(' IF[#150LT#101]THEN#150=#101');w(' #130=1');w(' WHILE[#130LE#122]DO2');w('  #120=#103/2+#110-#121*#130 (SUZHENIE PO XY)');w('  G0 '+XY(A));w('  G0 Z[#100+1.]');w('  G1 Z#150 F#106');w('  G1 '+XY(S1)+' F#105');lapLines(bp,false,'  ').forEach(w);w('  '+lout());w('  G0 Z[#100+#108]');w('  #130=#130+1');w(' END2');w('END1');
+if(fin){var bfo=bp.num?build(els,closed,sg,1,tl.d/2,P.la,false):bp;w('(CHISTOVOJ PROHOD)');w('#120=#103/2');w('G0 '+XY(bfo.A));w('G0 Z[#100+1.]');w('G1 Z#101 F#106');w('G1 '+XY(bfo.start)+' F#105');lapLines(bfo,false,'').forEach(w);w('G1 '+XY(bfo.B))}}
 else if(closed){w('G0 Z[#100+1.]');
 if(sp){w('G1 Z#100 F#106');w(lin());w('(SPIRAL VNIZ I PLOSKIJ KRUG NA DNE)');
 w('#133=FUP[[#100-#101]/#102]');w('#134=[#100-#101]/#133');w('#150=#100');w('#200=0');w('WHILE[#200LE#133]DO1');
@@ -968,12 +972,13 @@ h+='<div class="lb">'+(ch.closed?'Сторона':'Сторона фрезы п�
 if(ch.closed)h+='<div class="lb">Фрезерование</div>'+seg('climb',[['1','Попутное'],['0','Встречное']],o.climb);else h+='<div class="lb">Направление</div>'+seg('rev',[['0','Прямое'],['1','Обратное']],o.rev);
 if(o.side!=='on')h+=sw_('comp','Коррекция G41/G42','выкл. — радиус фрезы в переменной #120',o.comp);
 if(ch.closed){var en=[['sp','Спираль по Z','spiral'],['sd','Проходами по Z','down']];if(o.side==='out'&&!o.comp)en.push(['xy','Сужением по XY','fit']);else if(o.ent==='xy')o.ent='sd';h+='<div class="lb">Как снимать</div>'+seg('ent',en,o.ent);if(o.ent==='xy')h+='<div class="s">Фреза обходит контур кругами, каждый раз ближе к детали на шаг XY. «Z за проход» — сколько максимум снимать по Z за раз (0 — вся глубина сразу). «Съём XY» 0 — считается от габаритов заготовки.</div>'}
+else if(o.side!=='on'&&!o.comp){var ev=o.ent==='xy'?'xy':'sd';h+='<div class="lb">Как снимать</div>'+seg('ent',[['sd','Проходами по Z','down'],['xy','Сужением по XY','fit']],ev);if(ev==='xy')h+='<div class="s">Фреза идёт вдоль стенки несколько раз, каждый проход ближе к ней на шаг XY. «Z за проход» — сколько максимум по Z за раз (0 — вся глубина сразу). «Съём XY» 0 — считается от заготовки со стороны фрезы.</div>'}
 if(o.side!=='on'&&!o.comp)h+=sw_('fin','Чистовой проход на дне','последний круг без припуска',o.fin)}
 if(op.type==='holes'){h+='<div class="lb">Цикл</div>'+seg('cyc',[['81','G81 сверление'],['83','G83 с выводом'],['84','G84 метчик']],o.cyc)}
 if(op.type==='thread'){h+='<div class="lb">Резьба</div>'+seg('tk',[['in','Внутренняя'],['out','Наружная']],o.tk)+'<div class="lb">Виток</div>'+seg('hand',[['R','Правая'],['L','Левая']],o.hand)+'<div class="lb">Ход по Z</div>'+seg('tdir',[['up','Снизу вверх','up'],['dn','Сверху вниз','dn']],o.tdir)+sw_('spr','Зачистной проход','повтор последнего прохода',o.spr)}
 return h}
 function parKeys(op){var t=op.type,o=op.o,uv=o.side!=='on'&&!o.comp;
-if(t==='contour'){if(o.ent==='xy'&&uv&&o.side==='out')return ['z0','z1','zx','xw','ae','alw','f','fz','s','la','bz'];return ['z0','z1','dz'].concat(uv?['alw','dr']:[],['f','fz','s','la','bz'])}
+if(t==='contour'){if(o.ent==='xy'&&uv&&o.side!=='in')return ['z0','z1','zx','xw','ae','alw','f','fz','s','la','bz'];return ['z0','z1','dz'].concat(uv?['alw','dr']:[],['f','fz','s','la','bz'])}
 if(t==='chamfer')return ['z0','c','ex','f','s','la','bz'];
 if(t==='step')return ['z0','z1','dz','w','ae','f','fz','s','la','bz'];
 if(t==='pocket')return ['z0','z1','dz','ae','alw','f','fz','s','bz'];
