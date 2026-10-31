@@ -1,0 +1,42 @@
+plugins {
+    id 'com.android.application'
+}
+
+def runNumber = (System.getenv('GITHUB_RUN_NUMBER') ?: '1').toInteger()
+
+android {
+    namespace 'ru.cnc.naryady'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'ru.cnc.naryady'
+        minSdk 24
+        targetSdk 34
+        versionCode runNumber
+        versionName "1.0.${runNumber}"
+    }
+
+    signingConfigs {
+        app {
+            storeFile file('../app/release.jks')
+            storePassword 'gcode-viewer'
+            keyAlias 'gcode'
+            keyPassword 'gcode-viewer'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.app
+        }
+        debug {
+            signingConfig signingConfigs.app
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

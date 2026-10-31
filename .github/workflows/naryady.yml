@@ -1,0 +1,59 @@
+name: Build Naryady
+
+on:
+  push:
+    branches: [main, master]
+    paths: ['naryady/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Build page
+        run: python3 naryady/web/build.py
+
+      - name: Build APK
+        run: gradle :naryady:assembleRelease --no-daemon --stacktrace
+
+      - name: Rename APK
+        run: cp naryady/build/outputs/apk/release/naryady-release.apk Naryady-1.0.${{ github.run_number }}.apk
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: naryady-v1.0.${{ github.run_number }}
+          name: Наряды 1.0.${{ github.run_number }}
+          body: Приложение «Наряды». APK — для Android. iPhone — откройте в Safari https://etoneyaeslichto.github.io/gcode-viewer/naryady/ и добавьте на экран «Домой».
+          files: Naryady-*.apk
+          make_latest: false
+
+  iphone:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build site
+        run: |
+          GV=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest | python3 -c "import json,sys;print(json.load(sys.stdin).get('tag_name','v1.0.0').lstrip('v'))")
+          sh ios/pages.sh "$GV"
+
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          publish_branch: gh-pages
+          force_orphan: true

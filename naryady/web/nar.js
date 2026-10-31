@@ -97,16 +97,8 @@ $('nNew').onclick=function(){openForm(null)};$('nSend').onclick=openSend;
 [['nCoef','coef'],['nTax','tax'],['nPrem','prem']].forEach(function(x){$(x[0]).addEventListener('change',function(){var v=num(this.value);if(v!==null&&v>=0){D[x[1]]=v;sv()}render()})});
 $('nExp').onclick=function(){saveFile('naryady_'+curK,'json',JSON.stringify(D),function(m){$('nMsg').textContent=m})};
 $('nImp').onchange=function(){var f=this.files[0];this.value='';if(!f)return;var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);if(!o||!o.parts||!o.m)throw 0;D=o;sv();render();$('nMsg').textContent='Загружено: деталей '+D.parts.length+', месяцев '+Object.keys(D.m).length}catch(e){$('nMsg').textContent='Это не файл нарядов'}};r.readAsText(f)};
-/* ---------- drawer & mode ---------- */
-var MODE=ST.get('appMode','cnc');
-function drawer(on){$('dw').classList.toggle('on',on);$('dwBg').classList.toggle('on',on)}
-function setMode(m){MODE=m;ST.set('appMode',m);document.body.classList.toggle('nar',m==='nar');$('t6').hidden=m!=='nar';$('topTtl').textContent=m==='nar'?'Наряды':'Программа ЧПУ';
-[].forEach.call(document.querySelectorAll('#dw .dw'),function(b){b.classList.toggle('on',b.dataset.mode===m)});
-if(m==='nar'){render();window.scrollTo(0,0)}else{var t=document.querySelector('.tabs .tb.on');if(t)t.click();window.dispatchEvent(new Event('resize'))}}
-function subMark(){[].forEach.call(document.querySelectorAll('#dw .dsub button'),function(b){var t=$('tb'+b.dataset.tab);b.classList.toggle('on',MODE==='cnc'&&!!t&&t.classList.contains('on'))})}
-$('hb').onclick=function(){subMark();drawer(true)};$('dwBg').onclick=function(){drawer(false)};
-$('dw').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;if(b.dataset.mode){setMode(b.dataset.mode);drawer(false)}else if(b.dataset.tab){if(MODE!=='cnc')setMode('cnc');$('tb'+b.dataset.tab).click();drawer(false)}});
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){if(SH)close();else drawer(false)}});
-window.NAR={calc:calc,prevPrem:prevPrem,setMode:setMode,data:function(){return D}};
-setMode(MODE);
+/* ---------- start ---------- */
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&SH)close()});
+window.NAR={calc:calc,prevPrem:prevPrem,data:function(){return D}};
+$('t6').hidden=false;render();
 })();
