@@ -423,6 +423,7 @@ $('nImp').onchange=function(){var f=this.files[0];this.value='';if(!f)return;var
 /* ---------- start ---------- */
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&SH)close()});
 window.NAR={calc:calc,prevPrem:prevPrem,data:function(){return D}};
+var filled=Object.keys(D.m).filter(has).sort();if(filled.length)MK=filled[filled.length-1];
 $('t6').hidden=false;render();
 })();
 
