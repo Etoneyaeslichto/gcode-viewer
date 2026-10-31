@@ -72,6 +72,9 @@ jobs:
 
   iphone:
     runs-on: ubuntu-latest
+    concurrency:
+      group: gh-pages
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
 
