@@ -58,7 +58,7 @@ function bump(id,d){var m=M(MK,1),a=m[HALF][id]=m[HALF][id]||[],p=P(id),ms=!!(p&
 /* ---------- sheets ---------- */
 var SH=null,MSNEW={id:null,on:false};
 function sheet(html){close();var bg=document.createElement('div');bg.id='nSheetBg';var s=document.createElement('div');s.id='nSheet';s.innerHTML='<div class="grab"></div>'+html;bg.onclick=close;document.body.appendChild(bg);document.body.appendChild(s);SH=s;return s}
-function close(){['nSheet','nSheetBg'].forEach(function(i){var e=$(i);if(e)e.remove()});SH=null}
+function close(){var sb=$('nSetBox');if(sb&&sb.parentNode!==$('nSetHold'))$('nSetHold').appendChild(sb);['nSheet','nSheetBg'].forEach(function(i){var e=$(i);if(e)e.remove()});SH=null}
 function openPart(id){var p=P(id);if(!p)return;
 if(MSNEW.id!==id)MSNEW={id:id,on:!!p.ms};
 var blk=function(h){var a=(M(MK)||{a:{},p:{}})[h][id]||[],n=sum(a),nm=sumM(a,true);return '<div class="nbk'+(h===HALF?' cur':'')+'"><div class="tt"><b>'+HN[h]+'</b><span>'+qs(n)+' шт'+(nm>0?' (МС '+qs(nm)+')':'')+' · '+rub(bgross(p,a))+'</span></div>'+(a.length?'<div class="nbat">'+a.map(function(v,i){return '<span'+(bm(v)?' class="ms"':'')+'><button class="tg" data-tg="'+h+':'+i+'" title="Нажмите, чтобы переключить многостаночку">'+qs(bv(v))+(bm(v)?' МС':'')+'</button><button data-del="'+h+':'+i+'" aria-label="Убрать">✕</button></span>'}).join('')+'</div>':'')+'<div class="nadd"><label class="f"><span>Добавить</span><input id="nIn_'+h+'" inputmode="decimal" placeholder="шт"></label><button class="p" data-add="'+h+'">+</button></div></div>'};
@@ -142,5 +142,6 @@ $('nImp').onchange=function(){var f=this.files[0];this.value='';if(!f)return;var
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&SH)close()});
 window.NAR={calc:calc,prevPrem:prevPrem,data:function(){return D}};
 var filled=Object.keys(D.m).filter(has).sort();if(filled.length)MK=filled[filled.length-1];
+$('nGear').onclick=function(){var s=sheet('<div class="hd"><div><b>Настройки</b><small>расчёт, резервная копия, обновления</small></div><button class="ib" id="nX" aria-label="Закрыть">✕</button></div>');s.appendChild($('nSetBox'));$('nX').onclick=close};
 $('t6').hidden=false;render();
 })();
