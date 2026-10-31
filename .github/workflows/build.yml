@@ -38,7 +38,7 @@ jobs:
         with:
           tag_name: v1.0.${{ github.run_number }}
           name: G-код ЧПУ 1.0.${{ github.run_number }}
-          body: Сборка из коммита ${{ github.sha }}. APK — для Android, EXE — для Windows 10/11 (установка не нужна, просто запустите).
+          body: Сборка из коммита ${{ github.sha }}. APK — для Android, EXE — для Windows 10/11 (установка не нужна, просто запустите). iPhone — откройте в Safari https://etoneyaeslichto.github.io/gcode-viewer/ и добавьте на экран «Домой».
           files: GcodeViewer-*.apk
           make_latest: true
 
@@ -68,3 +68,18 @@ jobs:
         with:
           tag_name: v1.0.${{ github.run_number }}
           files: GcodeViewer-*.exe
+
+  iphone:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build web app for iPhone
+        run: python3 ios/make_site.py app/src/main/assets/index.html site 1.0.${{ github.run_number }}
+
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          publish_branch: gh-pages
+          force_orphan: true

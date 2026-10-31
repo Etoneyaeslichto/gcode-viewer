@@ -1,0 +1,17 @@
+<script>
+(function(){
+var BUILD='BUILD_VER',ios=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),
+standalone=window.navigator.standalone===true||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches);
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
+/* saving: share sheet on iPhone -> "Save to Files", AirDrop, messengers */
+var orig=window.saveFile;
+window.saveFile=function(nm,ext,t,cb){cb=cb||function(){};var f=null;try{f=new File([t],nm+'.'+ext,{type:'text/plain'})}catch(e){}
+if(ios&&f&&navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f]}).then(function(){cb('Готово: '+nm+'.'+ext)}).catch(function(e){cb(e&&e.name==='AbortError'?'Сохранение отменено':'Не удалось сохранить: '+(e&&e.message||''))});return}
+return orig(nm,ext,t,cb)};
+/* updates come automatically through the service worker */
+var uv=document.getElementById('upVer');if(uv){uv.textContent='Версия '+BUILD+' · обновляется сама при запуске с интернетом';['upChk','upGet'].forEach(function(id){var b=document.getElementById(id);if(b)b.hidden=true})}
+/* first visit in Safari: how to install */
+var k='iosHintSeen';var seen=false;try{seen=localStorage.getItem(k)==='1'}catch(e){}
+if(ios&&!standalone&&!seen){var d=document.createElement('div');d.id='iosHint';d.innerHTML='<b>Установить на iPhone:</b> нажмите «Поделиться» <span aria-hidden="true">⎙</span> внизу Safari → «На экран „Домой“». Приложение будет работать и без интернета.<button aria-label="Закрыть">✕</button>';document.body.appendChild(d);d.querySelector('button').onclick=function(){d.remove();try{localStorage.setItem(k,'1')}catch(e){}}}
+})();
+</script>
