@@ -193,16 +193,16 @@ body.nar main>section:not(#t6),body.nar nav.tabs{display:none!important}
 .ngr .acc{border-color:#1D9E75}
 .ngr .wide{grid-column:1/-1}
 .ngr button.lnk{border:0;background:transparent;padding:0;color:#1D9E75;font-size:12px;cursor:pointer}
-.nl{display:grid;gap:6px;margin:8px 0}
-.nr{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 12px;border:1px solid var(--bd);border-radius:12px;background:var(--sf);cursor:pointer}
+.nl{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;margin:8px 0}
+.nr{display:flex;align-items:center;gap:8px;padding:5px 6px 5px 10px;border:1px solid var(--bd);border-radius:10px;background:var(--sf);cursor:pointer;min-width:0;box-sizing:border-box}
 .nr.has{border-color:#1D9E75}
 .nr .t{flex:1;min-width:0}
-.nr .t b{display:block;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.nr .t small{display:block;font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nr .t b{display:block;font-size:13px;line-height:1.3;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nr .t small{display:block;font-size:11px;line-height:1.3;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .nr .t em{font-style:normal;color:var(--fg)}
 .nq{display:flex;align-items:center;gap:2px;flex:none}
-.nq button{width:34px;height:34px;padding:0;border-radius:10px;font-size:18px;line-height:1;display:inline-flex;align-items:center;justify-content:center}
-.nq span{min-width:40px;text-align:center;font-weight:700;font-size:15px}
+.nq button{width:30px;height:30px;padding:0;border-radius:8px;font-size:16px;line-height:1;display:inline-flex;align-items:center;justify-content:center}
+.nq span{min-width:34px;text-align:center;font-weight:700;font-size:14px}
 .nq span.z{color:var(--mut);font-weight:400}
 #nSheetBg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50}
 #nSheet{position:fixed;left:0;right:0;bottom:0;z-index:51;background:var(--bg);border-radius:18px 18px 0 0;border-top:1px solid var(--bd);max-height:88vh;overflow:auto;padding:14px 14px calc(16px + env(safe-area-inset-bottom,0px));box-sizing:border-box;display:grid;gap:12px;max-width:640px;margin:0 auto}
