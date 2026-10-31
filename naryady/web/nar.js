@@ -20,12 +20,17 @@ function fixed(p){return p.fx!==null&&p.fx!==undefined&&p.fx!==''}
 function price(p){return fixed(p)?+p.fx:(+p.b||0)*D.coef}
 function fac(p){return p.ms?+D.msK:1}
 function M(k,make){if(!D.m[k]&&make)D.m[k]={a:{},p:{}};var m=D.m[k];if(m){m.a=m.a||{};m.p=m.p||{}}return m}
-function sum(a){var s=0;(a||[]).forEach(function(x){s+=+x||0});return s}
+function bv(x){return x&&typeof x==='object'?+x.n||0:+x||0}
+function bm(x){return !!(x&&typeof x==='object'&&x.ms)}
+function sum(a){var s=0;(a||[]).forEach(function(x){s+=bv(x)});return s}
+function sumM(a,ms){var s=0;(a||[]).forEach(function(x){if(bm(x)===ms)s+=bv(x)});return s}
+function bgross(p,a){var s=0;(a||[]).forEach(function(x){s+=price(p)*bv(x)*(bm(x)?+D.msK:1)});return s}
+if(!D.bm){D.parts.forEach(function(p){if(!p.ms)return;Object.keys(D.m).forEach(function(k){['a','p'].forEach(function(h){var a=D.m[k][h]&&D.m[k][h][p.id];if(a)D.m[k][h][p.id]=a.map(function(x){return bm(x)?x:{n:bv(x),ms:1}})})})});D.bm=1;ST.set('nar',D)}
 function q(k,h,id){var m=M(k);return m?sum(m[h][id]):0}
-function gross(k,h){var m=M(k),s=0;if(!m)return 0;for(var id in m[h]){var p=P(id);if(p)s+=price(p)*fac(p)*sum(m[h][id])}return s}
+function gross(k,h){var m=M(k),s=0;if(!m)return 0;for(var id in m[h]){var p=P(id);if(p)s+=bgross(p,m[h][id])}return s}
 function cnt(k,h){var m=M(k),s=0;if(!m)return 0;for(var id in m[h])if(P(id))s+=sum(m[h][id]);return s}
 function has(k){return cnt(k,'a')+cnt(k,'p')>0}
-function calc(k){var t=1-D.tax/100,r={ga:0,gp:0,pr:0,prm:0},m=M(k);if(m)['a','p'].forEach(function(h){for(var id in m[h]){var p=P(id);if(!p)continue;var g=price(p)*fac(p)*sum(m[h][id]),pr=g*t*(p.ms?D.premMs:D.prem)/100;r['g'+h]+=g;r.pr+=pr;if(p.ms)r.prm+=pr}});r.na=r.ga*t;r.np=r.gp*t;r.g=r.ga+r.gp;r.n=r.na+r.np;return r}
+function calc(k){var t=1-D.tax/100,r={ga:0,gp:0,pr:0,prm:0},m=M(k);if(m)['a','p'].forEach(function(h){for(var id in m[h]){var p=P(id);if(!p)continue;m[h][id].forEach(function(x){var g=price(p)*bv(x)*(bm(x)?+D.msK:1),pr=g*t*(bm(x)?D.premMs:D.prem)/100;r['g'+h]+=g;r.pr+=pr;if(bm(x))r.prm+=pr})}});r.na=r.ga*t;r.np=r.gp*t;r.g=r.ga+r.gp;r.n=r.na+r.np;return r}
 function prevPrem(k){var m=M(k);if(m&&m.ppo!==null&&m.ppo!==undefined)return {v:+m.ppo,man:1};var pk=shift(k,-1);return {v:has(pk)?calc(pk).pr:0,man:0}}
 /* ---------- render ---------- */
 function render(){$('nMon').textContent=mon(MK);var c=calc(MK),pp=prevPrem(MK),tot=c.n+pp.v,pk=shift(MK,-1),nk=shift(MK,1);
@@ -42,19 +47,22 @@ list()}
 function list(){var f=String($('nQ').value||'').trim().toLowerCase(),L=D.parts.filter(function(p){var t=(p.dw+' '+p.nm).toLowerCase();if(f&&t.indexOf(f)<0)return false;if(ONLY&&q(MK,'a',p.id)+q(MK,'p',p.id)<=0)return false;return true});
 L=L.map(function(p,i){return {p:p,i:i,o:q(MK,HALF,p.id)>0?0:1}}).sort(function(a,b){return a.o-b.o||a.i-b.i});
 $('nList').innerHTML=L.length?L.map(function(x){var p=x.p,n=q(MK,HALF,p.id),o=q(MK,HALF==='a'?'p':'a',p.id);
-return '<div class="nr'+(n>0?' has':'')+'" data-pid="'+p.id+'"><div class="t"><b>'+esc(p.dw||'без номера')+'</b><small>'+(p.nm?esc(p.nm)+' · ':'')+'<em>'+rub(price(p))+'</em>'+(p.ms?' · <em class="ms">МС</em>':'')+(p.dr&&p.dr.length?' · <span class="clip" aria-label="есть чертёж">📎'+(p.dr.length>1?p.dr.length:'')+'</span>':'')+(o>0?' · '+(HALF==='a'?'получка ':'аванс ')+qs(o):'')+'</small></div><div class="nq"><button data-d="-1" aria-label="Минус">−</button><span class="'+(n>0?'':'z')+'">'+qs(n)+'</span><button data-d="1" aria-label="Плюс">+</button></div></div>'}).join(''):'<div class="s" style="padding:12px 4px">'+(ONLY?'В этом месяце на '+HN[HALF].toLowerCase()+' ещё ничего не записано':'Ничего не найдено')+'</div>'}
+return '<div class="nr'+(n>0?' has':'')+'" data-pid="'+p.id+'"><div class="t"><b>'+esc(p.dw||'без номера')+'</b><small>'+(p.nm?esc(p.nm)+' · ':'')+'<em>'+rub(price(p))+'</em>'+(hasMs(p)?' · <em class="ms">МС</em>':'')+(p.dr&&p.dr.length?' · <span class="clip" aria-label="есть чертёж">📎'+(p.dr.length>1?p.dr.length:'')+'</span>':'')+(o>0?' · '+(HALF==='a'?'получка ':'аванс ')+qs(o):'')+'</small></div><div class="nq"><button data-d="-1" aria-label="Минус">−</button><span class="'+(n>0?'':'z')+'">'+qs(n)+'</span><button data-d="1" aria-label="Плюс">+</button></div></div>'}).join(''):'<div class="s" style="padding:12px 4px">'+(ONLY?'В этом месяце на '+HN[HALF].toLowerCase()+' ещё ничего не записано':'Ничего не найдено')+'</div>'}
 /* quick ± changes the last batch of the current half */
-function bump(id,d){var m=M(MK,1),a=m[HALF][id]=m[HALF][id]||[];if(d>0){if(a.length)a[a.length-1]+=1;else a.push(1)}else{if(!a.length)return;a[a.length-1]-=1;if(a[a.length-1]<=0)a.pop()}if(!a.length)delete m[HALF][id];sv();render()}
+function hasMs(p){var m=M(MK);if(m&&['a','p'].some(function(h){return (m[h][p.id]||[]).some(bm)}))return true;return !!p.ms}
+function bump(id,d){var m=M(MK,1),a=m[HALF][id]=m[HALF][id]||[],p=P(id);if(d>0&&!a.length){a.push(p&&p.ms?{n:1,ms:1}:1)}else{if(!a.length)return;var i=a.length-1;if(bm(a[i]))a[i].n+=d;else a[i]+=d;if(bv(a[i])<=0)a.pop()}if(!a.length)delete m[HALF][id];sv();render()}
 /* ---------- sheets ---------- */
-var SH=null;
+var SH=null,MSNEW={id:null,on:false};
 function sheet(html){close();var bg=document.createElement('div');bg.id='nSheetBg';var s=document.createElement('div');s.id='nSheet';s.innerHTML='<div class="grab"></div>'+html;bg.onclick=close;document.body.appendChild(bg);document.body.appendChild(s);SH=s;return s}
 function close(){['nSheet','nSheetBg'].forEach(function(i){var e=$(i);if(e)e.remove()});SH=null}
 function openPart(id){var p=P(id);if(!p)return;
-var blk=function(h){var a=(M(MK)||{a:{},p:{}})[h][id]||[],n=sum(a);return '<div class="nbk'+(h===HALF?' cur':'')+'"><div class="tt"><b>'+HN[h]+'</b><span>'+qs(n)+' шт · '+rub(n*price(p)*fac(p))+'</span></div>'+(a.length?'<div class="nbat">'+a.map(function(v,i){return '<span>'+qs(v)+'<button data-del="'+h+':'+i+'" aria-label="Убрать">✕</button></span>'}).join('')+'</div>':'')+'<div class="nadd"><label class="f"><span>Добавить</span><input id="nIn_'+h+'" inputmode="decimal" placeholder="шт"></label><button class="p" data-add="'+h+'">+</button></div></div>'};
-var s=sheet('<div class="hd"><div><b>'+esc(p.dw||'без номера')+'</b><small>'+esc(p.nm||'')+'</small><small>'+(p.ms?'многостаночка: сумма ×'+String(D.msK).replace('.',',')+', премия '+D.premMs+'% · ':'')+(fixed(p)?'конечная цена '+rub(price(p))+' (своя)':'цена '+String(p.b||0).replace('.',',')+' × '+String(D.coef).replace('.',',')+' = '+rub(price(p)))+'</small></div><button class="ib" id="nX" aria-label="Закрыть">✕</button></div>'+blk('a')+blk('p')+drBlock(p)+'<div class="s">Количество за '+mon(MK).toLowerCase()+'. Каждое добавление — отдельная партия, лишнюю уберите крестиком.</div><div class="row" style="margin:0"><button id="nEd">Изменить деталь</button></div>');
-$('nX').onclick=close;$('nEd').onclick=function(){openForm(id)};
+if(MSNEW.id!==id)MSNEW={id:id,on:!!p.ms};
+var blk=function(h){var a=(M(MK)||{a:{},p:{}})[h][id]||[],n=sum(a),nm=sumM(a,true);return '<div class="nbk'+(h===HALF?' cur':'')+'"><div class="tt"><b>'+HN[h]+'</b><span>'+qs(n)+' шт'+(nm>0?' (МС '+qs(nm)+')':'')+' · '+rub(bgross(p,a))+'</span></div>'+(a.length?'<div class="nbat">'+a.map(function(v,i){return '<span'+(bm(v)?' class="ms"':'')+'><button class="tg" data-tg="'+h+':'+i+'" title="Нажмите, чтобы переключить многостаночку">'+qs(bv(v))+(bm(v)?' МС':'')+'</button><button data-del="'+h+':'+i+'" aria-label="Убрать">✕</button></span>'}).join('')+'</div>':'')+'<div class="nadd"><label class="f"><span>Добавить</span><input id="nIn_'+h+'" inputmode="decimal" placeholder="шт"></label><button class="p" data-add="'+h+'">+</button></div></div>'};
+var s=sheet('<div class="hd"><div><b>'+esc(p.dw||'без номера')+'</b><small>'+esc(p.nm||'')+'</small><small>'+(fixed(p)?'конечная цена '+rub(price(p))+' (своя)':'цена '+String(p.b||0).replace('.',',')+' × '+String(D.coef).replace('.',',')+' = '+rub(price(p)))+'</small></div><button class="ib" id="nX" aria-label="Закрыть">✕</button></div><label class="sw"><span>Многостаночка<small>для новых партий: сумма ×'+String(D.msK).replace('.',',')+', премия '+D.premMs+'%</small></span><input type="checkbox" id="nMsNew"'+(MSNEW.on?' checked':'')+'><i></i></label>'+blk('a')+blk('p')+drBlock(p)+'<div class="s">Количество за '+mon(MK).toLowerCase()+'. Каждое добавление — отдельная партия: нажмите на партию, чтобы отметить или снять «МС», лишнюю уберите крестиком.</div><div class="row" style="margin:0"><button id="nEd">Изменить деталь</button></div>');
+$('nX').onclick=close;$('nEd').onclick=function(){openForm(id)};$('nMsNew').onchange=function(){MSNEW.on=this.checked};
 s.addEventListener('click',function(e){var th=e.target.closest('[data-dr]');if(th){view(id,th.dataset.dr);return}var b=e.target.closest('button');if(!b)return;
-if(b.dataset.add){var h=b.dataset.add,v=num($('nIn_'+h).value);if(!(v>0))return;var m=M(MK,1);(m[h][id]=m[h][id]||[]).push(v);sv();render();openPart(id)}
+if(b.dataset.add){var h=b.dataset.add,v=num($('nIn_'+h).value);if(!(v>0))return;var m=M(MK,1);(m[h][id]=m[h][id]||[]).push(MSNEW.on?{n:v,ms:1}:v);sv();render();openPart(id)}
+if(b.dataset.tg){var tp=b.dataset.tg.split(':'),mt=M(MK,1),at=mt[tp[0]][id]||[],x=at[+tp[1]];at[+tp[1]]=bm(x)?bv(x):{n:bv(x),ms:1};sv();render();openPart(id)}
 if(b.dataset.del){var hp=b.dataset.del.split(':'),m2=M(MK,1),a=m2[hp[0]][id]||[];a.splice(+hp[1],1);if(!a.length)delete m2[hp[0]][id];sv();render();openPart(id)}});
 $('drIn').onchange=function(){var fl=[].slice.call(this.files);this.value='';addDrawings(id,fl)};
 ['a','p'].forEach(function(h){$('nIn_'+h).addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();s.querySelector('[data-add="'+h+'"]').click()}})})}
@@ -65,7 +73,7 @@ var s=sheet('<div class="hd"><div><b>'+(id?'Изменить деталь':'Но
 '<label class="f"><span>Цена</span><input id="fB" inputmode="decimal" value="'+(p.b===null||p.b===undefined?'':String(p.b).replace('.',','))+'" placeholder="0"></label>'+
 '<label class="sw"><span>Своя конечная цена<small>без умножения на коэффициент</small></span><input type="checkbox" id="fFxOn"'+(fx?' checked':'')+'><i></i></label>'+
 '<label class="f" id="fFxW"'+(fx?'':' hidden')+'><span>Конечная цена</span><input id="fFx" inputmode="decimal" value="'+(fx?String(p.fx).replace('.',','):'')+'"></label>'+
-'<label class="sw"><span>Многостаночка<small>сумма ×'+String(D.msK).replace('.',',')+', премия '+D.premMs+'% вместо '+D.prem+'%</small></span><input type="checkbox" id="fMs"'+(p.ms?' checked':'')+'><i></i></label><div class="s" id="fPv"></div><div class="row" style="margin:0"><button class="p" id="fOk">Сохранить</button>'+(id?'<button id="fDel" class="danger">Удалить деталь</button>':'')+'</div>');
+'<label class="sw"><span>Многостаночка по умолчанию<small>новые партии отмечаются МС: сумма ×'+String(D.msK).replace('.',',')+', премия '+D.premMs+'% вместо '+D.prem+'%</small></span><input type="checkbox" id="fMs"'+(p.ms?' checked':'')+'><i></i></label><div class="s" id="fPv"></div><div class="row" style="margin:0"><button class="p" id="fOk">Сохранить</button>'+(id?'<button id="fDel" class="danger">Удалить деталь</button>':'')+'</div>');
 var pv=function(){var on=$('fFxOn').checked,b=num($('fB').value)||0,f=num($('fFx').value);$('fFxW').hidden=!on;$('fPv').textContent='Конечная цена: '+rub(on&&f!==null?f:b*D.coef)+(on?'':' ('+String(b).replace('.',',')+' × '+String(D.coef).replace('.',',')+')')};
 ['fB','fFx'].forEach(function(i){$(i).addEventListener('input',pv)});$('fFxOn').addEventListener('change',pv);pv();
 $('nX').onclick=close;
@@ -104,9 +112,9 @@ img.addEventListener('pointermove',function(e){if(!P2.has(e.pointerId))return;va
 ['pointerup','pointercancel'].forEach(function(t){img.addEventListener(t,function(e){P2.delete(e.pointerId);ld=0})});
 w.addEventListener('wheel',function(e){e.preventDefault();S.s=Math.max(1,Math.min(8,S.s*(e.deltaY<0?1.15:0.87)));ap()},{passive:false})}
 /* ---------- send ---------- */
-function sendText(h){var m=M(MK)||{a:{},p:{}},rows=[];D.parts.forEach(function(p){var n=sum(m[h][p.id]);if(n>0)rows.push({p:p,n:n})});
+function sendText(h){var m=M(MK)||{a:{},p:{}},rows=[];D.parts.forEach(function(p){var a=m[h][p.id],n0=sumM(a,false),n1=sumM(a,true);if(n0>0)rows.push({p:p,n:n0});if(n1>0)rows.push({p:p,n:n1,ms:1})});
 if(!rows.length)return null;
-return rows.map(function(r){return (r.p.dw||'')+(r.p.nm?' ('+r.p.nm+')':'')+' — '+qs(r.n)+' шт'}).join('\n')}
+return rows.map(function(r){return (r.p.dw||'')+(r.p.nm?' ('+r.p.nm+')':'')+' — '+qs(r.n)+' шт'+(r.ms?' (многостаночка)':'')}).join('\n')}
 function copy(t,cb){var done=function(ok){cb(ok)};try{if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(t).then(function(){done(true)},function(){done(fb())});return}}catch(e){}done(fb());
 function fb(){try{var ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();ta.setSelectionRange(0,t.length);var ok=document.execCommand('copy');ta.remove();return ok}catch(e){return false}}}
 function openSend(){var s=sheet('<div class="hd"><div><b>Отправить наряды</b><small>'+mon(MK)+'</small></div><button class="ib" id="nX" aria-label="Закрыть">✕</button></div><div class="seg" id="sdH"><button data-h="a">На аванс</button><button data-h="p">На получку</button></div><textarea id="sdT" readonly style="height:220px"></textarea><div class="row" style="margin:0"><button class="p" id="sdCp">Скопировать</button><button id="sdSh" hidden>Поделиться…</button></div><div class="s" id="sdM"></div>');
