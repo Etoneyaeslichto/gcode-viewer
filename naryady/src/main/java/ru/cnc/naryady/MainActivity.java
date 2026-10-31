@@ -23,7 +23,12 @@ import android.webkit.WebViewClient;
 
 import org.json.JSONObject;
 
+import android.util.Base64;
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -214,6 +219,48 @@ public class MainActivity extends Activity {
     }
 
     private class Bridge {
+        private File drawing(String name) {
+            File d = new File(getFilesDir(), "drawings");
+            if (!d.exists()) {
+                d.mkdirs();
+            }
+            return new File(d, String.valueOf(name).replaceAll("[^A-Za-z0-9_.-]", "_"));
+        }
+
+        @JavascriptInterface
+        public boolean putFile(String name, String b64) {
+            try (OutputStream o = new FileOutputStream(drawing(name))) {
+                o.write(Base64.decode(b64, Base64.DEFAULT));
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public String getFile(String name) {
+            File f = drawing(name);
+            if (!f.exists()) {
+                return "";
+            }
+            try (InputStream in = new FileInputStream(f)) {
+                ByteArrayOutputStream bo = new ByteArrayOutputStream();
+                byte[] buf = new byte[65536];
+                int n;
+                while ((n = in.read(buf)) > 0) {
+                    bo.write(buf, 0, n);
+                }
+                return Base64.encodeToString(bo.toByteArray(), Base64.NO_WRAP);
+            } catch (Exception e) {
+                return "";
+            }
+        }
+
+        @JavascriptInterface
+        public boolean delFile(String name) {
+            return drawing(name).delete();
+        }
+
         @JavascriptInterface
         public void installUpdate(String url) {
             if (url != null && url.startsWith("https://")) {

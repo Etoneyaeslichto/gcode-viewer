@@ -69,3 +69,15 @@ body.nar main{display:block;max-width:1200px;margin:0 auto}
 #t6:not([hidden]){display:grid;grid-template-columns:420px minmax(0,1fr);column-gap:24px;align-items:start}
 #t6 .nleft{position:sticky;top:16px}
 }
+.nr .t em.ms{color:#D85A30;font-weight:600}
+.nr .clip{font-size:11px}
+.ndr{display:flex;flex-wrap:wrap;gap:8px}
+.ndr .th{width:76px;height:76px;padding:0;border-radius:10px;overflow:hidden;border:1px solid var(--bd);background:var(--sf);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;flex:none}
+.ndr .th img{width:100%;height:100%;object-fit:cover;display:block}
+.ndr .th.add span{font-size:26px;line-height:1;color:#1D9E75}
+.ndr .th.add small{font-size:11px;color:var(--mut)}
+#nView{position:fixed;inset:0;z-index:60;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:none}
+#nView img{max-width:100%;max-height:100%;transform-origin:center center;touch-action:none;user-select:none;-webkit-user-select:none}
+#nView .vb{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,rgba(0,0,0,.8))}
+#nView .vb span{flex:1;color:#fff;font-weight:600;font-size:14px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#nView .vl{position:absolute;color:#ccc;font-size:14px}

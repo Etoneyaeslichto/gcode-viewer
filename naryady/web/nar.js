@@ -4,7 +4,7 @@ var MN=['Январь','Февраль','Март','Апрель','Май','Ию
 var MNp=['январе','феврале','марте','апреле','мае','июне','июле','августе','сентябре','октябре','ноябре','декабре'];
 var MNg=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
 var SEED=__SEED__;
-var D=ST.get('nar',null);if(!D||!D.parts){D=JSON.parse(JSON.stringify(SEED));ST.set('nar',D)}if(!D.m)D.m={};
+var D=ST.get('nar',null);if(!D||!D.parts){D=JSON.parse(JSON.stringify(SEED));ST.set('nar',D)}if(!D.m)D.m={};if(D.premMs===undefined)D.premMs=90;
 var pad=function(n){return (n<10?'0':'')+n},now=new Date(),curK=now.getFullYear()+'-'+pad(now.getMonth()+1);
 var MK=curK,HALF=now.getDate()<=15?'a':'p',ONLY=false,HN={a:'Аванс',p:'Получка'};
 function sv(){ST.set('nar',D)}
@@ -24,24 +24,24 @@ function q(k,h,id){var m=M(k);return m?sum(m[h][id]):0}
 function gross(k,h){var m=M(k),s=0;if(!m)return 0;for(var id in m[h]){var p=P(id);if(p)s+=price(p)*sum(m[h][id])}return s}
 function cnt(k,h){var m=M(k),s=0;if(!m)return 0;for(var id in m[h])if(P(id))s+=sum(m[h][id]);return s}
 function has(k){return cnt(k,'a')+cnt(k,'p')>0}
-function calc(k){var ga=gross(k,'a'),gp=gross(k,'p'),t=1-D.tax/100,na=ga*t,np=gp*t;return {ga:ga,gp:gp,na:na,np:np,g:ga+gp,n:na+np,pr:(na+np)*D.prem/100}}
+function calc(k){var t=1-D.tax/100,r={ga:0,gp:0,pr:0,prm:0},m=M(k);if(m)['a','p'].forEach(function(h){for(var id in m[h]){var p=P(id);if(!p)continue;var g=price(p)*sum(m[h][id]),pr=g*t*(p.ms?D.premMs:D.prem)/100;r['g'+h]+=g;r.pr+=pr;if(p.ms)r.prm+=pr}});r.na=r.ga*t;r.np=r.gp*t;r.g=r.ga+r.gp;r.n=r.na+r.np;return r}
 function prevPrem(k){var m=M(k);if(m&&m.ppo!==null&&m.ppo!==undefined)return {v:+m.ppo,man:1};var pk=shift(k,-1);return {v:has(pk)?calc(pk).pr:0,man:0}}
 /* ---------- render ---------- */
 function render(){$('nMon').textContent=mon(MK);var c=calc(MK),pp=prevPrem(MK),tot=c.n+pp.v,pk=shift(MK,-1),nk=shift(MK,1);
 $('nTot').textContent=rub(tot);$('nTotSub').textContent='наряды '+rub(c.n)+' + премия за '+monl(pk)+' '+rub(pp.v);
 var cell=function(t,v,s,cls){return '<div'+(cls?' class="'+cls+'"':'')+'><small>'+t+'</small><b>'+v+'</b>'+(s?'<i>'+s+'</i>':'')+'</div>'};
 $('nGr').innerHTML=cell('Аванс',rub(c.ga),'чистыми '+rub(c.na))+cell('Получка',rub(c.gp),'чистыми '+rub(c.np))+
-cell('Наряды за месяц',rub(c.g),'после налога '+rub(c.n))+cell('Премия '+D.prem+'% за этот месяц',rub(c.pr),'придёт в '+MNp[+nk.slice(5)-1],'acc')+
+cell('Наряды за месяц',rub(c.g),'после налога '+rub(c.n))+cell('Премия за этот месяц',rub(c.pr),'придёт в '+MNp[+nk.slice(5)-1]+(c.prm>0?' · из неё многостаночка '+rub(c.prm):''),'acc')+
 '<div><small>Премия за '+monl(pk)+'</small><b>'+rub(pp.v)+'</b><i>'+(pp.man?'вписана вручную':'из нарядов за '+monl(pk))+' · <button class="lnk" id="nPPed">изменить</button></i></div>'+
 cell('Наряды + премия',rub(c.n+c.pr),'после налога, этого месяца');
 $('nPPed').onclick=openPP;
 [].forEach.call($('nHalf').children,function(b){b.classList.toggle('on',b.dataset.h===HALF)});$('nOnly').classList.toggle('on',ONLY);$('nOnly').classList.toggle('p',ONLY);
-$('nCoef').value=String(D.coef).replace('.',',');$('nTax').value=String(D.tax).replace('.',',');$('nPrem').value=String(D.prem).replace('.',',');
+$('nCoef').value=String(D.coef).replace('.',',');$('nTax').value=String(D.tax).replace('.',',');$('nPrem').value=String(D.prem).replace('.',',');$('nPremMs').value=String(D.premMs).replace('.',',');
 list()}
 function list(){var f=String($('nQ').value||'').trim().toLowerCase(),L=D.parts.filter(function(p){var t=(p.dw+' '+p.nm).toLowerCase();if(f&&t.indexOf(f)<0)return false;if(ONLY&&q(MK,'a',p.id)+q(MK,'p',p.id)<=0)return false;return true});
 L=L.map(function(p,i){return {p:p,i:i,o:q(MK,HALF,p.id)>0?0:1}}).sort(function(a,b){return a.o-b.o||a.i-b.i});
 $('nList').innerHTML=L.length?L.map(function(x){var p=x.p,n=q(MK,HALF,p.id),o=q(MK,HALF==='a'?'p':'a',p.id);
-return '<div class="nr'+(n>0?' has':'')+'" data-pid="'+p.id+'"><div class="t"><b>'+esc(p.dw||'без номера')+'</b><small>'+(p.nm?esc(p.nm)+' · ':'')+'<em>'+rub(price(p))+'</em>'+(o>0?' · '+(HALF==='a'?'получка ':'аванс ')+qs(o):'')+'</small></div><div class="nq"><button data-d="-1" aria-label="Минус">−</button><span class="'+(n>0?'':'z')+'">'+qs(n)+'</span><button data-d="1" aria-label="Плюс">+</button></div></div>'}).join(''):'<div class="s" style="padding:12px 4px">'+(ONLY?'В этом месяце на '+HN[HALF].toLowerCase()+' ещё ничего не записано':'Ничего не найдено')+'</div>'}
+return '<div class="nr'+(n>0?' has':'')+'" data-pid="'+p.id+'"><div class="t"><b>'+esc(p.dw||'без номера')+'</b><small>'+(p.nm?esc(p.nm)+' · ':'')+'<em>'+rub(price(p))+'</em>'+(p.ms?' · <em class="ms">МС</em>':'')+(p.dr&&p.dr.length?' · <span class="clip" aria-label="есть чертёж">📎'+(p.dr.length>1?p.dr.length:'')+'</span>':'')+(o>0?' · '+(HALF==='a'?'получка ':'аванс ')+qs(o):'')+'</small></div><div class="nq"><button data-d="-1" aria-label="Минус">−</button><span class="'+(n>0?'':'z')+'">'+qs(n)+'</span><button data-d="1" aria-label="Плюс">+</button></div></div>'}).join(''):'<div class="s" style="padding:12px 4px">'+(ONLY?'В этом месяце на '+HN[HALF].toLowerCase()+' ещё ничего не записано':'Ничего не найдено')+'</div>'}
 /* quick ± changes the last batch of the current half */
 function bump(id,d){var m=M(MK,1),a=m[HALF][id]=m[HALF][id]||[];if(d>0){if(a.length)a[a.length-1]+=1;else a.push(1)}else{if(!a.length)return;a[a.length-1]-=1;if(a[a.length-1]<=0)a.pop()}if(!a.length)delete m[HALF][id];sv();render()}
 /* ---------- sheets ---------- */
@@ -50,11 +50,12 @@ function sheet(html){close();var bg=document.createElement('div');bg.id='nSheetB
 function close(){['nSheet','nSheetBg'].forEach(function(i){var e=$(i);if(e)e.remove()});SH=null}
 function openPart(id){var p=P(id);if(!p)return;
 var blk=function(h){var a=(M(MK)||{a:{},p:{}})[h][id]||[],n=sum(a);return '<div class="nbk'+(h===HALF?' cur':'')+'"><div class="tt"><b>'+HN[h]+'</b><span>'+qs(n)+' шт · '+rub(n*price(p))+'</span></div>'+(a.length?'<div class="nbat">'+a.map(function(v,i){return '<span>'+qs(v)+'<button data-del="'+h+':'+i+'" aria-label="Убрать">✕</button></span>'}).join('')+'</div>':'')+'<div class="nadd"><label class="f"><span>Добавить</span><input id="nIn_'+h+'" inputmode="decimal" placeholder="шт"></label><button class="p" data-add="'+h+'">+</button></div></div>'};
-var s=sheet('<div class="hd"><div><b>'+esc(p.dw||'без номера')+'</b><small>'+esc(p.nm||'')+'</small><small>'+(fixed(p)?'конечная цена '+rub(price(p))+' (своя)':'цена '+String(p.b||0).replace('.',',')+' × '+String(D.coef).replace('.',',')+' = '+rub(price(p)))+'</small></div><button class="ib" id="nX" aria-label="Закрыть">✕</button></div>'+blk('a')+blk('p')+'<div class="s">Количество за '+mon(MK).toLowerCase()+'. Каждое добавление — отдельная партия, лишнюю уберите крестиком.</div><div class="row" style="margin:0"><button id="nEd">Изменить деталь</button></div>');
+var s=sheet('<div class="hd"><div><b>'+esc(p.dw||'без номера')+'</b><small>'+esc(p.nm||'')+'</small><small>'+(p.ms?'многостаночка, премия '+D.premMs+'% · ':'')+(fixed(p)?'конечная цена '+rub(price(p))+' (своя)':'цена '+String(p.b||0).replace('.',',')+' × '+String(D.coef).replace('.',',')+' = '+rub(price(p)))+'</small></div><button class="ib" id="nX" aria-label="Закрыть">✕</button></div>'+blk('a')+blk('p')+drBlock(p)+'<div class="s">Количество за '+mon(MK).toLowerCase()+'. Каждое добавление — отдельная партия, лишнюю уберите крестиком.</div><div class="row" style="margin:0"><button id="nEd">Изменить деталь</button></div>');
 $('nX').onclick=close;$('nEd').onclick=function(){openForm(id)};
-s.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+s.addEventListener('click',function(e){var th=e.target.closest('[data-dr]');if(th){view(id,th.dataset.dr);return}var b=e.target.closest('button');if(!b)return;
 if(b.dataset.add){var h=b.dataset.add,v=num($('nIn_'+h).value);if(!(v>0))return;var m=M(MK,1);(m[h][id]=m[h][id]||[]).push(v);sv();render();openPart(id)}
 if(b.dataset.del){var hp=b.dataset.del.split(':'),m2=M(MK,1),a=m2[hp[0]][id]||[];a.splice(+hp[1],1);if(!a.length)delete m2[hp[0]][id];sv();render();openPart(id)}});
+$('drIn').onchange=function(){var fl=[].slice.call(this.files);this.value='';addDrawings(id,fl)};
 ['a','p'].forEach(function(h){$('nIn_'+h).addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();s.querySelector('[data-add="'+h+'"]').click()}})})}
 function openForm(id){var p=id?P(id):{dw:'',nm:'',b:'',fx:null},fx=fixed(p);
 var s=sheet('<div class="hd"><div><b>'+(id?'Изменить деталь':'Новая деталь')+'</b></div><button class="ib" id="nX" aria-label="Закрыть">✕</button></div>'+
@@ -63,18 +64,44 @@ var s=sheet('<div class="hd"><div><b>'+(id?'Изменить деталь':'Но
 '<label class="f"><span>Цена</span><input id="fB" inputmode="decimal" value="'+(p.b===null||p.b===undefined?'':String(p.b).replace('.',','))+'" placeholder="0"></label>'+
 '<label class="sw"><span>Своя конечная цена<small>без умножения на коэффициент</small></span><input type="checkbox" id="fFxOn"'+(fx?' checked':'')+'><i></i></label>'+
 '<label class="f" id="fFxW"'+(fx?'':' hidden')+'><span>Конечная цена</span><input id="fFx" inputmode="decimal" value="'+(fx?String(p.fx).replace('.',','):'')+'"></label>'+
-'<div class="s" id="fPv"></div><div class="row" style="margin:0"><button class="p" id="fOk">Сохранить</button>'+(id?'<button id="fDel" class="danger">Удалить деталь</button>':'')+'</div>');
+'<label class="sw"><span>Многостаночка<small>премия с этой детали '+D.premMs+'% вместо '+D.prem+'%</small></span><input type="checkbox" id="fMs"'+(p.ms?' checked':'')+'><i></i></label><div class="s" id="fPv"></div><div class="row" style="margin:0"><button class="p" id="fOk">Сохранить</button>'+(id?'<button id="fDel" class="danger">Удалить деталь</button>':'')+'</div>');
 var pv=function(){var on=$('fFxOn').checked,b=num($('fB').value)||0,f=num($('fFx').value);$('fFxW').hidden=!on;$('fPv').textContent='Конечная цена: '+rub(on&&f!==null?f:b*D.coef)+(on?'':' ('+String(b).replace('.',',')+' × '+String(D.coef).replace('.',',')+')')};
 ['fB','fFx'].forEach(function(i){$(i).addEventListener('input',pv)});$('fFxOn').addEventListener('change',pv);pv();
 $('nX').onclick=close;
 $('fOk').onclick=function(){var dw=$('fDw').value.trim(),nm=$('fNm').value.trim();if(!dw&&!nm){$('fPv').textContent='Впишите номер по чертежу или название';return}
-var o=id?P(id):{id:'p'+Date.now().toString(36)};o.dw=dw;o.nm=nm;o.b=num($('fB').value);o.fx=$('fFxOn').checked?num($('fFx').value):null;if(!id)D.parts.unshift(o);sv();render();if(id)openPart(id);else close()};
+var o=id?P(id):{id:'p'+Date.now().toString(36)};o.dw=dw;o.nm=nm;o.b=num($('fB').value);o.fx=$('fFxOn').checked?num($('fFx').value):null;o.ms=$('fMs').checked?1:0;if(!id)D.parts.unshift(o);sv();render();if(id)openPart(id);else close()};
 if(id)$('fDel').onclick=function(){var b=this;if(!b.classList.contains('arm')){b.classList.add('arm');b.textContent='Точно удалить? Нажмите ещё раз';return}
-D.parts=D.parts.filter(function(x){return x.id!==id});Object.keys(D.m).forEach(function(k){delete D.m[k].a[id];delete D.m[k].p[id]});sv();close();render()}}
+(P(id).dr||[]).forEach(function(x){FS.del(x.id)});D.parts=D.parts.filter(function(x){return x.id!==id});Object.keys(D.m).forEach(function(k){delete D.m[k].a[id];delete D.m[k].p[id]});sv();close();render()}}
 function openPP(){var m=M(MK),pk=shift(MK,-1),auto=has(pk)?calc(pk).pr:0;
-sheet('<div class="hd"><div><b>Премия за '+monl(pk)+'</b><small>приходит в '+mon(MK).toLowerCase()+'</small></div><button class="ib" id="nX" aria-label="Закрыть">✕</button></div><div class="s">Автоматически: '+D.prem+'% от нарядов за '+monl(pk)+' после налога = '+rub(auto)+(has(pk)?'':' (за '+monl(pk)+' в приложении нет записей)')+'. Если пришло другое число — впишите его.</div><label class="f"><span>Сумма премии</span><input id="ppV" inputmode="decimal" value="'+(m&&m.ppo!=null?String(m.ppo).replace('.',','):'')+'" placeholder="'+String(Math.round(auto*100)/100).replace('.',',')+'"></label><div class="row" style="margin:0"><button class="p" id="ppOk">Сохранить</button><button id="ppAuto">Считать автоматически</button></div>');
+sheet('<div class="hd"><div><b>Премия за '+monl(pk)+'</b><small>приходит в '+mon(MK).toLowerCase()+'</small></div><button class="ib" id="nX" aria-label="Закрыть">✕</button></div><div class="s">Автоматически: '+D.prem+'% (многостаночка '+D.premMs+'%) от нарядов за '+monl(pk)+' после налога = '+rub(auto)+(has(pk)?'':' (за '+monl(pk)+' в приложении нет записей)')+'. Если пришло другое число — впишите его.</div><label class="f"><span>Сумма премии</span><input id="ppV" inputmode="decimal" value="'+(m&&m.ppo!=null?String(m.ppo).replace('.',','):'')+'" placeholder="'+String(Math.round(auto*100)/100).replace('.',',')+'"></label><div class="row" style="margin:0"><button class="p" id="ppOk">Сохранить</button><button id="ppAuto">Считать автоматически</button></div>');
 $('nX').onclick=close;$('ppOk').onclick=function(){var v=num($('ppV').value);var mm=M(MK,1);if(v===null)delete mm.ppo;else mm.ppo=v;sv();close();render()};
 $('ppAuto').onclick=function(){var mm=M(MK);if(mm)delete mm.ppo;sv();close();render()}}
+/* ---------- drawings ---------- */
+var FS=(function(){var A=window.Android,idb=null;
+function db(){if(idb)return idb;idb=new Promise(function(res,rej){try{var r=indexedDB.open('naryady',1);r.onupgradeneeded=function(){r.result.createObjectStore('f')};r.onsuccess=function(){res(r.result)};r.onerror=function(){rej(r.error)}}catch(e){rej(e)}});return idb}
+function tx(mode,fn){return db().then(function(d){return new Promise(function(res,rej){var t=d.transaction('f',mode),st=t.objectStore('f'),q=fn(st);t.oncomplete=function(){res(q&&q.result)};t.onerror=function(){rej(t.error)}})})}
+function b64(blob){return new Promise(function(res){var r=new FileReader();r.onload=function(){res(String(r.result))};r.readAsDataURL(blob)})}
+function toBlob(u){var p=u.split(','),bin=atob(p[1]),a=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);return new Blob([a],{type:(p[0].match(/data:([^;]+)/)||[])[1]||'image/jpeg'})}
+var api={put:function(id,blob){if(A&&A.putFile)return b64(blob).then(function(u){if(!A.putFile(id,u.split(',')[1]))throw new Error('нет места')});return tx('readwrite',function(s){return s.put(blob,id)})},
+get:function(id){if(A&&A.getFile){var s=A.getFile(id);return Promise.resolve(s?'data:image/jpeg;base64,'+s:'')}return tx('readonly',function(s){return s.get(id)}).then(function(b){return b?b64(b):''})},
+del:function(id){if(A&&A.delFile){A.delFile(id);return Promise.resolve()}return tx('readwrite',function(s){return s.delete(id)}).catch(function(){})}};
+api.putUrl=function(id,u){return api.put(id,toBlob(u))};return api})();
+function shrink(file,max,q){return new Promise(function(res,rej){var u=URL.createObjectURL(file),im=new Image();im.onload=function(){var k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(function(b){b?res({b:b,c:c}):rej(new Error('не удалось обработать фото'))},'image/jpeg',q)};im.onerror=function(){URL.revokeObjectURL(u);rej(new Error('это не картинка'))};im.src=u})}
+function drBlock(p){var L=p.dr||[];return '<div class="nbk"><div class="tt"><b>Чертежи</b><span>'+(L.length?L.length+' шт':'нет')+'</span></div><div class="ndr">'+L.map(function(x){return '<button class="th" data-dr="'+x.id+'" aria-label="Открыть чертёж"><img src="'+x.th+'" alt=""></button>'}).join('')+'<label class="th add" aria-label="Добавить чертёж"><span>+</span><small>Фото</small><input type="file" id="drIn" accept="image/*" multiple hidden></label></div><div class="s" id="drMsg">'+(L.length?'Нажмите на чертёж, чтобы открыть':'Сфотографируйте чертёж или выберите картинку — хранится в приложении')+'</div></div>'}
+function addDrawings(id,files){var p=P(id);if(!p||!files.length)return;var m=$('drMsg');if(m)m.textContent='Сохраняю…';
+var go=function(i){if(i>=files.length){sv();render();openPart(id);return}var f=files[i];Promise.all([shrink(f,2600,0.88),shrink(f,240,0.7)]).then(function(r){var did='d'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);return FS.put(did,r[0].b).then(function(){(p.dr=p.dr||[]).push({id:did,th:r[1].c.toDataURL('image/jpeg',0.7),t:Date.now()});sv()})}).then(function(){go(i+1)}).catch(function(e){if(m)m.textContent='Не удалось сохранить: '+(e&&e.message||e)})};go(0)}
+function view(pid,did){var p=P(pid),x=(p.dr||[]).filter(function(d){return d.id===did})[0];if(!x)return;
+var w=document.createElement('div');w.id='nView';w.innerHTML='<img alt=""><div class="vb"><span>'+esc(p.dw||'')+'</span><button id="vDel">Удалить</button><button class="p" id="vX">Закрыть</button></div><div class="vl">Загружаю…</div>';document.body.appendChild(w);
+var img=w.querySelector('img'),S={s:1,x:0,y:0},P2=new Map(),ld=0,last=0;
+var ap=function(){img.style.transform='translate('+S.x+'px,'+S.y+'px) scale('+S.s+')'};
+FS.get(did).then(function(u){var l=w.querySelector('.vl');if(!u){l.textContent='Файл чертежа не найден';return}l.remove();img.src=u});
+var close2=function(){w.remove()};$('vX').onclick=close2;
+$('vDel').onclick=function(){var b=this;if(!b.classList.contains('arm')){b.classList.add('arm');b.textContent='Точно удалить?';return}FS.del(did);p.dr=p.dr.filter(function(d){return d.id!==did});sv();close2();render();openPart(pid)};
+img.addEventListener('pointerdown',function(e){img.setPointerCapture(e.pointerId);P2.set(e.pointerId,[e.clientX,e.clientY]);if(P2.size===2){var a=[].slice.call(P2.values());ld=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1])}
+var n=Date.now();if(P2.size===1&&n-last<300){S=S.s>1?{s:1,x:0,y:0}:{s:2.5,x:0,y:0};ap()}last=n});
+img.addEventListener('pointermove',function(e){if(!P2.has(e.pointerId))return;var o=P2.get(e.pointerId);P2.set(e.pointerId,[e.clientX,e.clientY]);if(P2.size===1){S.x+=e.clientX-o[0];S.y+=e.clientY-o[1]}else if(P2.size===2){var a=[].slice.call(P2.values()),d=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);if(ld)S.s=Math.max(1,Math.min(8,S.s*d/ld));ld=d}ap()});
+['pointerup','pointercancel'].forEach(function(t){img.addEventListener(t,function(e){P2.delete(e.pointerId);ld=0})});
+w.addEventListener('wheel',function(e){e.preventDefault();S.s=Math.max(1,Math.min(8,S.s*(e.deltaY<0?1.15:0.87)));ap()},{passive:false})}
 /* ---------- send ---------- */
 function sendText(h){var m=M(MK)||{a:{},p:{}},rows=[];D.parts.forEach(function(p){var n=sum(m[h][p.id]);if(n>0)rows.push({p:p,n:n})});
 if(!rows.length)return null;
@@ -93,9 +120,11 @@ $('nOnly').onclick=function(){ONLY=!ONLY;render()};
 $('nQ').addEventListener('input',list);
 $('nPrev').onclick=function(){MK=shift(MK,-1);render()};$('nNext').onclick=function(){MK=shift(MK,1);render()};
 $('nNew').onclick=function(){openForm(null)};$('nSend').onclick=openSend;
-[['nCoef','coef'],['nTax','tax'],['nPrem','prem']].forEach(function(x){$(x[0]).addEventListener('change',function(){var v=num(this.value);if(v!==null&&v>=0){D[x[1]]=v;sv()}render()})});
-$('nExp').onclick=function(){saveFile('naryady_'+curK,'json',JSON.stringify(D),function(m){$('nMsg').textContent=m})};
-$('nImp').onchange=function(){var f=this.files[0];this.value='';if(!f)return;var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);if(!o||!o.parts||!o.m)throw 0;D=o;sv();render();$('nMsg').textContent='Загружено: деталей '+D.parts.length+', месяцев '+Object.keys(D.m).length}catch(e){$('nMsg').textContent='Это не файл нарядов'}};r.readAsText(f)};
+[['nCoef','coef'],['nTax','tax'],['nPrem','prem'],['nPremMs','premMs']].forEach(function(x){$(x[0]).addEventListener('change',function(){var v=num(this.value);if(v!==null&&v>=0){D[x[1]]=v;sv()}render()})});
+$('nExp').onclick=function(){var ids=[];D.parts.forEach(function(p){(p.dr||[]).forEach(function(x){ids.push(x.id)})});$('nMsg').textContent=ids.length?'Собираю чертежи…':'';
+Promise.all(ids.map(function(i){return FS.get(i).then(function(u){return [i,u]})})).then(function(L){var o=JSON.parse(JSON.stringify(D)),f={};L.forEach(function(x){if(x[1])f[x[0]]=x[1]});o.files=f;
+saveFile('naryady_'+curK,'json',JSON.stringify(o),function(m){$('nMsg').textContent=m+(ids.length?' (с чертежами: '+Object.keys(f).length+')':'')})})};
+$('nImp').onchange=function(){var f=this.files[0];this.value='';if(!f)return;var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);if(!o||!o.parts||!o.m)throw 0;var fl=o.files||{};delete o.files;D=o;if(D.premMs===undefined)D.premMs=90;sv();render();Object.keys(fl).forEach(function(i){FS.putUrl(i,fl[i])});$('nMsg').textContent='Загружено: деталей '+D.parts.length+', месяцев '+Object.keys(D.m).length}catch(e){$('nMsg').textContent='Это не файл нарядов'}};r.readAsText(f)};
 /* ---------- start ---------- */
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&SH)close()});
 window.NAR={calc:calc,prevPrem:prevPrem,data:function(){return D}};
