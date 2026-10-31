@@ -95,3 +95,5 @@ body.nar main{display:block;max-width:1200px;margin:0 auto}
 .nrs b{font-weight:600;color:#1D9E75}
 .nrs button{padding:4px 10px;font-size:13px}
 #nRaises{display:grid;gap:6px}
+.nr .t small.earn{color:#1D9E75;font-weight:600}
+#nSheet .hd small.earn{color:#1D9E75;font-weight:600}
