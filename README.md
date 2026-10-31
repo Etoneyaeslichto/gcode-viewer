@@ -18,3 +18,9 @@
 ## iPhone
 
 Откройте в Safari https://etoneyaeslichto.github.io/gcode-viewer/ → «Поделиться» → «На экран „Домой“». Работает без интернета, обновляется сама. Файлы .nc сохраняются через «Поделиться» → «Сохранить в Файлы».
+
+## Наряды (отдельное приложение)
+
+- Android: [все версии «Нарядов»](https://github.com/Etoneyaeslichto/gcode-viewer/releases?q=naryady) — файл Naryady-….apk
+- iPhone: https://etoneyaeslichto.github.io/gcode-viewer/naryady/ → «Поделиться» → «На экран „Домой“»
+- Исходники: папка `naryady/`
