@@ -259,6 +259,14 @@ body.nar main{display:block;max-width:1200px;margin:0 auto}
 #nRaises{display:grid;gap:6px}
 .nr .t small.earn{color:#1D9E75;font-weight:600}
 #nSheet .hd small.earn{color:#1D9E75;font-weight:600}
+.ngr small{display:flex;align-items:center;gap:6px}
+.ngr .ic{display:inline-flex;width:22px;height:22px;border-radius:7px;align-items:center;justify-content:center;color:#fff;flex:none}
+.dayc .dnav{display:flex;align-items:center;gap:6px;margin:6px 0 2px}
+.dayc .dnav button{width:34px;height:34px;padding:0;border-radius:10px;font-size:20px;line-height:1;display:inline-flex;align-items:center;justify-content:center}
+.dayc .dnav button:disabled{opacity:.35}
+.dayc .dlb{flex:1;position:relative;display:flex;align-items:center;justify-content:center;height:34px;border:1px solid var(--bd);border-radius:10px;background:var(--sf);font-weight:600;font-size:15px;cursor:pointer}
+.dayc .dlb input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:0}
+.dayc>b{font-size:22px}
 body.nar main{display:block;max-width:900px;margin:0 auto}
 #topbar img{width:30px;height:30px;border-radius:8px}
 #iosHint{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:99;background:#1D9E75;color:#fff;border-radius:14px;padding:12px 40px 12px 14px;font:14px/1.4 system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.35)}
@@ -329,6 +337,11 @@ function bv(x){return x&&typeof x==='object'?+x.n||0:+x||0}
 function bm(x){return !!(x&&typeof x==='object'&&x.ms)}
 function bd(x){return x&&typeof x==='object'?x.d||null:null}
 function today(){var t=new Date();return t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate())}
+var DAY=today();
+function dshift(d,n){var t=new Date(+d.slice(0,4),+d.slice(5,7)-1,+d.slice(8,10)+n);return t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate())}
+function dlabel(d){if(d===today())return 'Сегодня';if(d===dshift(today(),-1))return 'Вчера';var s=(+d.slice(8,10))+' '+MNr[+d.slice(5,7)-1].split(' ')[0];return d.slice(0,4)===today().slice(0,4)?s:s+' '+d.slice(0,4)}
+var ICS={day:['#1D9E75','<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>'],adv:['#378ADD','<path d="M12 3v18"/><path d="M16 7.5c0-1.7-1.8-2.5-4-2.5s-4 .9-4 2.6c0 3.8 8 1.9 8 5.8 0 1.8-1.8 2.6-4 2.6s-4-.8-4-2.5"/>'],pay:['#7F77DD','<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16" cy="14.5" r="1.3"/>'],mon:['#5F6B76','<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4v2h6V4M9 11h6M9 15h4"/>'],prem:['#D85A30','<rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M12 9v11M4 13h16M12 9c-1.5-4-6-4-5-1 .6 1 3 1 5 1zm0 0c1.5-4 6-4 5-1-.6 1-3 1-5 1z"/>'],prev:['#C08A1E','<path d="M12 7v5l3 2"/><circle cx="12" cy="12" r="8"/>'],sum:['#2E8B57','<path d="M17 5H7l5 7-5 7h10"/>']};
+function ic(k){var x=ICS[k];return '<span class="ic" style="background:'+x[0]+'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+x[1]+'</svg></span>'}
 function partEarn(k,id){var p=P(id),m=M(k),t=1-D.tax/100,s=0;if(!p||!m)return 0;['a','p'].forEach(function(h){(m[h][id]||[]).forEach(function(x){s+=price(p,k)*bv(x)*(bm(x)?+D.msK:1)*t*(1+(bm(x)?D.premMs:D.prem)/100)})});return s}
 function dayEarn(day){var t=1-D.tax/100,r={n:0,c:0};Object.keys(D.m).forEach(function(k){var m=M(k);['a','p'].forEach(function(h){for(var id in m[h]){var p=P(id);if(!p)continue;m[h][id].forEach(function(x){if(bd(x)!==day)return;var g=price(p,k)*bv(x)*(bm(x)?+D.msK:1)*t;r.n+=g*(1+(bm(x)?D.premMs:D.prem)/100);r.c+=bv(x)})}})});return r}
 function sum(a){var s=0;(a||[]).forEach(function(x){s+=bv(x)});return s}
@@ -344,12 +357,13 @@ function prevPrem(k){var m=M(k);if(m&&m.ppo!==null&&m.ppo!==undefined)return {v:
 /* ---------- render ---------- */
 function render(){$('nMon').textContent=mon(MK);var c=calc(MK),pp=prevPrem(MK),tot=c.n+pp.v,pk=shift(MK,-1),nk=shift(MK,1);
 $('nTot').textContent=rub(tot);$('nTotSub').textContent='наряды '+rub(c.n)+' + премия за '+monl(pk)+' '+rub(pp.v);
-var cell=function(t,v,s,cls){return '<div'+(cls?' class="'+cls+'"':'')+'><small>'+t+'</small><b>'+v+'</b>'+(s?'<i>'+s+'</i>':'')+'</div>'};
-var td=dayEarn(today());
-$('nGr').innerHTML=cell('Сегодня заработано',rub(td.n),td.c>0?'после налога, с премией · '+qs(td.c)+' шт':'после налога, с премией · сегодня ещё ничего не записано','acc wide')+cell('Аванс',rub(c.ga),'чистыми '+rub(c.na))+cell('Получка',rub(c.gp),'чистыми '+rub(c.np))+
-cell('Наряды за месяц',rub(c.g),'после налога '+rub(c.n))+cell('Премия за этот месяц',rub(c.pr),'придёт в '+MNp[+nk.slice(5)-1]+(c.prm>0?' · из неё многостаночка '+rub(c.prm):''),'acc')+
-'<div><small>Премия за '+monl(pk)+'</small><b>'+rub(pp.v)+'</b><i>'+(pp.man?'вписана вручную':'из нарядов за '+monl(pk))+' · <button class="lnk" id="nPPed">изменить</button></i></div>'+
-cell('Наряды + премия',rub(c.n+c.pr),'после налога, этого месяца');
+var cell=function(t,v,s,cls,k){return '<div'+(cls?' class="'+cls+'"':'')+'><small>'+(k?ic(k):'')+t+'</small><b>'+v+'</b>'+(s?'<i>'+s+'</i>':'')+'</div>'};
+var td=dayEarn(DAY),isT=DAY===today();
+$('nGr').innerHTML='<div class="acc wide dayc"><small>'+ic('day')+'Заработок за день</small><div class="dnav"><button id="dPrev" aria-label="Предыдущий день">‹</button><label class="dlb"><span>'+dlabel(DAY)+'</span><input type="date" id="dPick" value="'+DAY+'"></label><button id="dNext" aria-label="Следующий день"'+(isT?' disabled':'')+'>›</button></div><b>'+rub(td.n)+'</b><i>'+(td.c>0?'после налога, с премией · '+qs(td.c)+' шт':'после налога, с премией · '+(isT?'сегодня':'в этот день')+' ничего не записано')+(isT?'':' · новые партии пишутся на этот день')+'</i></div>'+cell('Аванс',rub(c.ga),'чистыми '+rub(c.na),'','adv')+cell('Получка',rub(c.gp),'чистыми '+rub(c.np),'','pay')+
+cell('Наряды за месяц',rub(c.g),'после налога '+rub(c.n),'','mon')+cell('Премия за этот месяц',rub(c.pr),'придёт в '+MNp[+nk.slice(5)-1]+(c.prm>0?' · из неё многостаночка '+rub(c.prm):''),'acc','prem')+
+'<div><small>'+ic('prev')+'Премия за '+monl(pk)+'</small><b>'+rub(pp.v)+'</b><i>'+(pp.man?'вписана вручную':'из нарядов за '+monl(pk))+' · <button class="lnk" id="nPPed">изменить</button></i></div>'+
+cell('Наряды + премия',rub(c.n+c.pr),'после налога, этого месяца','','sum');
+$('dPrev').onclick=function(){DAY=dshift(DAY,-1);render()};$('dNext').onclick=function(){if(DAY<today()){DAY=dshift(DAY,1);render()}};$('dPick').onchange=function(){if(this.value){DAY=this.value>today()?today():this.value;render()}};
 $('nPPed').onclick=openPP;renderRaises();
 [].forEach.call($('nHalf').children,function(b){b.classList.toggle('on',b.dataset.h===HALF)});$('nOnly').classList.toggle('on',ONLY);$('nOnly').classList.toggle('p',ONLY);
 $('nCoef').value=String(D.coef).replace('.',',');$('nTax').value=String(D.tax).replace('.',',');$('nPrem').value=String(D.prem).replace('.',',');$('nPremMs').value=String(D.premMs).replace('.',',');$('nMsK').value=String(D.msK).replace('.',',');
@@ -360,7 +374,7 @@ $('nList').innerHTML=L.length?L.map(function(x){var p=x.p,n=q(MK,HALF,p.id),o=q(
 return '<div class="nr'+(n>0?' has':'')+'" data-pid="'+p.id+'"><div class="t"><b>'+esc(p.dw||'без номера')+'</b><small>'+(p.nm?esc(p.nm)+' · ':'')+'<em>'+rub(price(p))+'</em>'+(hasMs(p)?' · <em class="ms">МС</em>':'')+(p.dr&&p.dr.length?' · <span class="clip" aria-label="есть чертёж">📎'+(p.dr.length>1?p.dr.length:'')+'</span>':'')+(o>0?' · '+(HALF==='a'?'получка ':'аванс ')+qs(o):'')+'</small>'+(n+o>0?'<small class="earn">заработано '+rub(partEarn(MK,p.id))+'</small>':'')+'</div><div class="nq"><button data-d="-1" aria-label="Минус">−</button><span class="'+(n>0?'':'z')+'">'+qs(n)+'</span><button data-d="1" aria-label="Плюс">+</button></div></div>'}).join(''):'<div class="s" style="padding:12px 4px">'+(!D.parts.length?'Деталей пока нет — добавьте первую зелёной кнопкой «+» справа от поиска':ONLY?'В этом месяце на '+HN[HALF].toLowerCase()+' ещё ничего не записано':'Ничего не найдено')+'</div>'}
 /* quick ± changes the last batch of the current half */
 function hasMs(p){var m=M(MK);if(m&&['a','p'].some(function(h){return (m[h][p.id]||[]).some(bm)}))return true;return !!p.ms}
-function bump(id,d){var m=M(MK,1),a=m[HALF][id]=m[HALF][id]||[],p=P(id),ms=!!(p&&p.ms),L=a[a.length-1];if(d>0&&!(L&&bd(L)===today()&&bm(L)===ms)){var nb={n:1,d:today()};if(ms)nb.ms=1;a.push(nb)}else{if(!a.length)return;var i=a.length-1;if(typeof a[i]==='object')a[i].n+=d;else a[i]+=d;if(bv(a[i])<=0)a.pop()}if(!a.length)delete m[HALF][id];sv();render()}
+function bump(id,d){var m=M(MK,1),a=m[HALF][id]=m[HALF][id]||[],p=P(id),ms=!!(p&&p.ms),L=a[a.length-1];if(d>0&&!(L&&bd(L)===DAY&&bm(L)===ms)){var nb={n:1,d:DAY};if(ms)nb.ms=1;a.push(nb)}else{if(!a.length)return;var i=a.length-1;if(typeof a[i]==='object')a[i].n+=d;else a[i]+=d;if(bv(a[i])<=0)a.pop()}if(!a.length)delete m[HALF][id];sv();render()}
 /* ---------- sheets ---------- */
 var SH=null,MSNEW={id:null,on:false};
 function sheet(html){close();var bg=document.createElement('div');bg.id='nSheetBg';var s=document.createElement('div');s.id='nSheet';s.innerHTML='<div class="grab"></div>'+html;bg.onclick=close;document.body.appendChild(bg);document.body.appendChild(s);SH=s;return s}
@@ -371,7 +385,7 @@ var blk=function(h){var a=(M(MK)||{a:{},p:{}})[h][id]||[],n=sum(a),nm=sumM(a,tru
 var s=sheet('<div class="hd"><div><b>'+esc(p.dw||'без номера')+'</b><small>'+esc(p.nm||'')+'</small><small>'+(fixed(p)?'конечная цена '+rub(price(p))+' (своя)':'цена '+String(p.b||0).replace('.',',')+' × '+String(D.coef).replace('.',',')+' = '+rub(base(p))+(mult(p,MK)!==1?' → с повышением '+rub(price(p)):''))+'</small><small class="earn">заработано за '+monl(MK)+': '+rub(partEarn(MK,id))+' (после налога, с премией)</small></div><button class="ib" id="nX" aria-label="Закрыть">✕</button></div><label class="sw"><span>Многостаночка<small>для новых партий: сумма ×'+String(D.msK).replace('.',',')+', премия '+D.premMs+'%</small></span><input type="checkbox" id="nMsNew"'+(MSNEW.on?' checked':'')+'><i></i></label>'+blk('a')+blk('p')+drBlock(p)+'<div class="s">Количество за '+mon(MK).toLowerCase()+'. Каждое добавление — отдельная партия: нажмите на партию, чтобы отметить или снять «МС», лишнюю уберите крестиком.</div><div class="row" style="margin:0"><button id="nEd">Изменить деталь</button></div>');
 $('nX').onclick=close;$('nEd').onclick=function(){openForm(id)};$('nMsNew').onchange=function(){MSNEW.on=this.checked};
 s.addEventListener('click',function(e){var th=e.target.closest('[data-dr]');if(th){view(id,th.dataset.dr);return}var b=e.target.closest('button');if(!b)return;
-if(b.dataset.add){var h=b.dataset.add,v=num($('nIn_'+h).value);if(!(v>0))return;var m=M(MK,1);var nb={n:v,d:today()};if(MSNEW.on)nb.ms=1;(m[h][id]=m[h][id]||[]).push(nb);sv();render();openPart(id)}
+if(b.dataset.add){var h=b.dataset.add,v=num($('nIn_'+h).value);if(!(v>0))return;var m=M(MK,1);var nb={n:v,d:DAY};if(MSNEW.on)nb.ms=1;(m[h][id]=m[h][id]||[]).push(nb);sv();render();openPart(id)}
 if(b.dataset.tg){var tp=b.dataset.tg.split(':'),mt=M(MK,1),at=mt[tp[0]][id]||[],x=at[+tp[1]];var o=x&&typeof x==='object'?x:{n:bv(x)};if(o.ms)delete o.ms;else o.ms=1;at[+tp[1]]=o;sv();render();openPart(id)}
 if(b.dataset.del){var hp=b.dataset.del.split(':'),m2=M(MK,1),a=m2[hp[0]][id]||[];a.splice(+hp[1],1);if(!a.length)delete m2[hp[0]][id];sv();render();openPart(id)}});
 $('drIn').onchange=function(){var fl=[].slice.call(this.files);this.value='';addDrawings(id,fl)};
