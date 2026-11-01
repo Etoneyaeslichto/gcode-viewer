@@ -109,3 +109,7 @@ body.nar main{display:block;max-width:1200px;margin:0 auto}
 .drow{display:flex;align-items:center;gap:8px;padding:6px 6px 6px 10px;border:1px solid var(--bd);border-radius:10px;background:var(--sf)}
 .drow .t{flex:1;min-width:0}.drow .t b{display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.drow .t small{display:block;font-size:11px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .drow .dx{width:30px;height:30px;color:#D85A30}
+#nSheet{grid-template-columns:minmax(0,1fr)}
+#nSheet>*{min-width:0}
+.drow{min-width:0;box-sizing:border-box}
+.drow .nq span{min-width:32px}
