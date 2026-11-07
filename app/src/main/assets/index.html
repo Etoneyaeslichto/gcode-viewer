@@ -49,7 +49,7 @@ details.s[open]>summary::after{transform:rotate(-135deg)}
 .f span,.f em{font-size:12px;font-weight:600;color:var(--mut);font-style:normal}
 .f input{flex:1;min-width:0;width:100%;border:0;outline:0;background:transparent;color:var(--fg);font:inherit;font-size:15px;text-align:right}
 #nok{justify-content:center;height:42px}
-.cd{margin:8px 0;padding:12px;border:1px solid var(--bd);border-radius:12px;background:var(--sf);display:grid;gap:12px}
+.cd{margin:8px 0;padding:12px;border:1px solid var(--bd);border-radius:12px;background:var(--sf);display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}
 .lb{font-size:12px;color:var(--mut);margin-bottom:5px}
 .seg{display:flex;background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:3px;gap:3px}
 .seg button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;border:0;background:transparent;border-radius:8px;padding:8px 4px;font:inherit;font-size:13px;color:var(--fg);cursor:pointer}
@@ -200,6 +200,7 @@ button:not(.p):not(.on):hover,label.b:hover{border-color:var(--mut)}
 </section>
 <section id="t4" hidden>
 <div class="cd"><div class="h">Материал заготовки</div><div class="seg wrap" id="matSeg"></div></div>
+<div class="cd"><div class="h">Набор инструмента</div><div class="s">Свои наборы под разные работы или под себя и сменщика. Операции берут инструмент из выбранного набора по номеру T.</div><div class="seg wrap" id="tpSeg"></div><div class="row" style="margin-bottom:0"><button id="tpNew" data-i="plus">Новый</button><button id="tpRen" data-i="edit">Переименовать</button><button id="tpDel" data-i="trash">Удалить</button></div><div id="tpEd"></div></div>
 <div class="cd"><div class="h">Инструменты</div><div id="tlList"></div><div id="tlEd"></div><button id="tlAdd" class="wide" data-i="plus">Добавить инструмент</button></div>
 <div class="cd"><div class="h">Режимы резания</div><div class="s">Расчёт для выбранного инструмента и материала. Эти значения подставляются в операции.</div><div class="ch" id="rcTools"></div><div class="kv" id="rcOut"></div></div>
 <div class="cd"><div class="h">Станок</div><div class="pg"><label class="f"><span>Макс. обороты</span><input id="mcS" inputmode="decimal"></label><label class="f"><span>Скорость G0</span><input id="mcG" inputmode="decimal"></label><label class="f"><span>Смена инстр., с</span><input id="mcT" inputmode="decimal"></label></div></div>
@@ -613,11 +614,18 @@ function label(t){if(!t)return '—';return 'T'+t.n+' '+TN[t.type]+' Ø'+nf(t.d)
 function nf(v){return String(parseFloat((+v).toFixed(3)))}
 window.TOOLS={all:all,get:get,calc:calc,mat:mat,label:label,TN:TN,TL:TL,MAT:MAT,matName:function(){var m=mat();return (MAT.filter(function(x){return x[0]===m})[0]||['',''])[1]}};
 var ED=null,SEL=null;
-function save(list){ST.set('tools',list)}
+function save(list){ST.set('tools',list);var P=prof();P.list[P.cur].tools=list;ST.set('tprof',P)}
+function prof(){var P=ST.get('tprof',null);if(!P||!P.list||!P.list.length){P={cur:0,list:[{name:'Основной',tools:all()}]};ST.set('tprof',P)}if(!(P.cur>=0&&P.cur<P.list.length))P.cur=0;return P}
+function pswitch(i){var P=prof();P.list[P.cur].tools=all();P.cur=i;var t=P.list[i].tools;if(!t||!t.length)t=DEF.slice();P.list[i].tools=t;ST.set('tprof',P);ST.set('tools',t);SEL=null;ED=null}
+function esc(x){return String(x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+var PE=null;
 function row(t){var c=calc(t);return '<div class="opc"><span class="badge">T'+t.n+'</span><span class="opi">'+IC((TT.filter(function(x){return x[0]===t.type})[0]||TT[0])[2])+'</span><div class="opt"><b>'+TN[t.type]+' Ø'+nf(t.d)+(t.type==='tap'?' × '+nf(t.p||1):'')+'</b><small>'+(t.type==='chamfer'?nf(t.ang||90)+'° · вершина Ø'+nf(t.dt||0)+' · ':'')+(t.z&&['mill','face','thread','chamfer'].indexOf(t.type)>=0?t.z+' з · ':'')+(t.mat==='hss'?'HSS':'ТС')+' · S '+c.S+' · F '+c.F+'</small></div><button class="ib" data-te="'+t.n+'" aria-label="Изменить">'+IC('edit')+'</button><button class="ib" data-td="'+t.n+'" aria-label="Удалить">'+IC('trash')+'</button></div>'}
 function seg(key,opts,cur){return '<div class="seg'+(opts.length>3?' wrap':'')+'">'+opts.map(function(o){return '<button data-ts="'+key+'" data-v="'+o[0]+'" class="'+(String(cur)===String(o[0])?'on':'')+'">'+(o[2]?IC(o[2]):'')+o[1]+'</button>'}).join('')+'</div>'}
 function fld(k,lb,v){return '<label class="f"><span>'+lb+'</span><input data-tf="'+k+'" inputmode="decimal" value="'+(v===undefined?'':v)+'"></label>'}
-function render(){var L=all(),m=mat();
+function render(){var L=all(),m=mat(),P=prof();
+$('tpSeg').innerHTML=P.list.map(function(p,i){return '<button data-tp="'+i+'" class="'+(i===P.cur?'on':'')+'">'+esc(p.name)+' <small style="opacity:.6">'+((p.tools||[]).length)+'</small></button>'}).join('');
+$('tpDel').hidden=P.list.length<2;
+$('tpEd').innerHTML=PE?'<div class="pi"><label class="f"><span>'+(PE==='new'?'Название нового набора':'Новое название')+'</span><input id="tpName" value="'+(PE==='new'?'':esc(P.list[P.cur].name))+'" placeholder="Например: Окна"></label>'+(PE==='new'?'<div class="lb">Заполнить</div><div class="seg"><button data-tpf="copy" class="'+(PE_F==='copy'?'on':'')+'">Копия текущего</button><button data-tpf="def" class="'+(PE_F==='def'?'on':'')+'">Стандартный</button></div>':'')+'<div class="row"><button class="p" id="tpOk">'+IC('check')+'Сохранить</button><button id="tpNo">Отмена</button></div><div class="s danger" id="tpErr"></div></div>':'';
 $('matSeg').innerHTML=MAT.map(function(x){return '<button data-mat="'+x[0]+'" class="'+(x[0]===m?'on':'')+'">'+x[1]+'</button>'}).join('');
 $('tlList').innerHTML=L.map(row).join('')||'<div class="s">Инструментов нет</div>';
 if(ED){var t=ED;$('tlEd').innerHTML='<div class="pi"><div class="lb">Тип</div>'+seg('type',TT,t.type)+'<div class="pg">'+fld('n','Номер T',t.n)+fld('d','Ø, мм',t.d)+(['mill','face','thread','chamfer'].indexOf(t.type)>=0?fld('z','Зубьев',t.z):'')+(t.type==='tap'?fld('p','Шаг P',t.p):'')+(t.type==='chamfer'?fld('dt','Ø вершины',t.dt)+fld('ang','Угол, °',t.ang):'')+'</div><div class="lb">Материал инструмента</div>'+seg('mat',[['carbide','Твёрдый сплав'],['hss','Быстрорез HSS']],t.mat)+'<div class="row"><button class="p" id="tlOk" data-i="check">'+IC('check')+'Сохранить</button><button id="tlNo">Отмена</button></div><div class="s danger" id="tlErr"></div></div>';$('tlAdd').style.display='none'}
@@ -627,9 +635,19 @@ $('rcTools').innerHTML=L.map(function(t){return '<button data-rc="'+t.n+'" class
 var c=calc(get(SEL)),kv=function(a,b,u){return '<div><small>'+a+'</small><b>'+b+'</b>'+(u?' <small style="display:inline">'+u+'</small>':'')+'</div>'};
 $('rcOut').innerHTML=c?kv('Vc',c.vc,'м/мин')+kv('S',c.S,'об/мин')+kv('F',c.F,'мм/мин')+(c.fz!==undefined?kv('fz',c.fz,'мм/зуб'):'')+(c.fr!==undefined?kv('f',c.fr,'мм/об'):'')+(c.ap!==undefined?kv('Шаг Z',c.ap,'мм'):'')+(c.ae!==undefined?kv('Шаг XY',c.ae,'мм'):'')+(c.q!==undefined?kv('Вывод Q',c.q,'мм'):''):'';
 var mc=mach();$('mcS').value=mc.smax;$('mcG').value=mc.g0;$('mcT').value=mc.tc}
-var root=$('t4');
+var PE_F='copy',root=$('t4');
 root.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;var L=all();
 if(b.dataset.mat){ST.set('mat',b.dataset.mat);render();return}
+if(b.dataset.tp){var i=+b.dataset.tp;if(i!==prof().cur){pswitch(i);PE=null;render()}return}
+if(b.id==='tpNew'){PE='new';PE_F='copy';render();var q=$('tpName');if(q)q.focus();return}
+if(b.id==='tpRen'){PE='ren';render();var q2=$('tpName');if(q2)q2.focus();return}
+if(b.dataset.tpf){PE_F=b.dataset.tpf;var nm=$('tpName').value;render();$('tpName').value=nm;return}
+if(b.id==='tpNo'){PE=null;render();return}
+if(b.id==='tpOk'){var nm2=$('tpName').value.trim(),P=prof();if(!nm2){$('tpErr').textContent='Введите название';return}
+if(P.list.some(function(p,j){return p.name.toLowerCase()===nm2.toLowerCase()&&!(PE==='ren'&&j===P.cur)})){$('tpErr').textContent='Такой набор уже есть';return}
+if(PE==='ren'){P.list[P.cur].name=nm2;ST.set('tprof',P)}else{P.list[P.cur].tools=all();P.list.push({name:nm2,tools:PE_F==='copy'?JSON.parse(JSON.stringify(all())):DEF.slice()});ST.set('tprof',P);pswitch(P.list.length-1)}
+PE=null;render();return}
+if(b.id==='tpDel'){var P2=prof();if(P2.list.length<2)return;if(b.classList.contains('arm')){var k=P2.cur;P2.list.splice(k,1);P2.cur=0;ST.set('tprof',P2);var t2=P2.list[0].tools;ST.set('tools',t2&&t2.length?t2:DEF.slice());SEL=null;ED=null;PE=null;render()}else{b.classList.add('arm');b.innerHTML=IC('trash')+'Точно удалить «'+esc(P2.list[P2.cur].name)+'»?';setTimeout(function(){if(b.isConnected){b.classList.remove('arm');b.innerHTML=IC('trash')+'Удалить'}},3000)}return}
 if(b.dataset.rc){SEL=+b.dataset.rc;render();return}
 if(b.dataset.te){ED=JSON.parse(JSON.stringify(get(b.dataset.te)));ED._old=ED.n;if(ED.dt===undefined)ED.dt=1;if(ED.ang===undefined)ED.ang=90;render();return}
 if(b.dataset.td){if(b.classList.contains('arm')){save(L.filter(function(t){return t.n!==+b.dataset.td}));render()}else{b.classList.add('arm');b.innerHTML=IC('trash')+'?';setTimeout(function(){if(b.isConnected){b.classList.remove('arm');b.innerHTML=IC('trash')}},2500)}return}
@@ -645,6 +663,7 @@ L=L.filter(function(x){return x.n!==t._old});L.push(nt);save(L);ED=null;SEL=nt.n
 root.addEventListener('input',function(e){var k=e.target.dataset.tf;if(k&&ED){ED[k]=e.target.value;return}
 if(['mcS','mcG','mcT'].indexOf(e.target.id)>=0){var v=function(i){var x=parseFloat($(i).value);return isNaN(x)?'':x};ST.set('mach',{smax:v('mcS'),g0:v('mcG'),tc:v('mcT')});var c=calc(get(SEL));if(c)render()}});
 window.toolsShow=render;
+root.addEventListener('keydown',function(e){if(e.target.id==='tpName'&&e.key==='Enter'){e.preventDefault();$('tpOk').click()}});
 
 /* library */
 var LQ='';
