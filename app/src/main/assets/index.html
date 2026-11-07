@@ -985,13 +985,13 @@ function toolFor(type,cur){var L=window.TOOLS.all();if(cur&&tget(cur))return cur
 function fillCalc(op){var tl=tget(op.tool),c=window.TOOLS.calc(tl);if(!c)return;var p=op.p;p.s=c.S;if(c.F!==undefined)p.f=c.F;p.fz=c.Fz;if(c.ap!==undefined)p.dz=c.ap;if(c.ae!==undefined)p.ae=c.ae;if(c.q!==undefined)p.q=c.q;
 if(op.type==='holes')op.o.cyc=tl.type==='tap'?'84':(tl.type==='drill'&&(p.z0-p.z1)>3*tl.d?'83':'81');if(op.type==='face'&&tl.type!=='face')p.ae=+(tl.d*.6).toFixed(1)}
 function dbb(){var D=(window.cadGet?window.cadGet():[]).filter(function(o){return !o.u&&(o.t==='l'||o.t==='c')}),xs=[],ys=[];D.forEach(function(o){if(o.t==='l'){xs.push(o.a[0],o.b[0]);ys.push(o.a[1],o.b[1])}else{xs.push(o.c[0]-o.r,o.c[0]+o.r);ys.push(o.c[1]-o.r,o.c[1]+o.r)}});if(!xs.length)return null;var z=Z0();return [Math.min.apply(0,xs)-z[0],Math.min.apply(0,ys)-z[1],Math.max.apply(0,xs)-z[0],Math.max.apply(0,ys)-z[1]]}
-function newOp(type){var s=stk()||{zt:0},zr=s.zt||0,zt=zr>0?0:zr,op={id:Date.now(),type:type,tool:null,g:null,o:{},p:{z0:zt,z1:zt-10,dz:2,alw:0.3,f:500,fz:150,s:3000,la:3,bz:5,ae:4}};
+function newOp(type){var s=stk()||{zt:0},zr=s.zt||0,zt=zr>0?0:zr,op={id:Date.now(),type:type,tool:null,g:null,o:{},p:{z0:zt,z1:zt-10,dz:2,alw:0,f:500,fz:150,s:3000,la:3,bz:5,ae:4}};
 op.tool=toolFor(type);
 if(type==='contour')op.o={side:'out',climb:1,comp:0,ent:'sp',fin:0,rev:0};
 if(type==='pocket'){op.p.alw=0.3}
 if(type==='contour'){op.p.dr=0;op.p.xw=0;op.p.zx=0}
 if(type==='chamfer'){op.o={side:'out',climb:1,rev:0};op.p.c=0.5;op.p.ex=0.3;op.p.la=3}
-if(type==='slot'){op.o={fin:1};op.p.w=0;op.p.dz=1;op.p.alw=0.2;var sl0=tget(op.tool);op.p.ae=+((sl0?sl0.d:10)*0.4).toFixed(1)}
+if(type==='slot'){op.o={fin:1};op.p.w=0;op.p.dz=1;op.p.alw=0;var sl0=tget(op.tool);op.p.ae=+((sl0?sl0.d:10)*0.4).toFixed(1)}
 if(type==='flat'){op.o={cnt:2,fin:0};op.p.sf=0;op.p.a0=0;op.p.zx=0;op.p.alw=0;var fl0=tget(op.tool);op.p.ae=+((fl0?fl0.d:10)*0.3).toFixed(1)}
 if(type==='step'){op.o={side:'left',rev:0};op.p.w=10;var st0=tget(op.tool);op.p.la=+((st0?st0.d/2:5)+2).toFixed(1)}
 if(type==='face'){var b=s&&s.x1!==undefined?[s.x0,s.y0,s.x1,s.y1]:(dbb()||[0,0,100,50]);op.p.x0=b[0];op.p.y0=b[1];op.p.x1=b[2];op.p.y1=b[3];op.p.z0=zr;op.p.z1=zr>0?0:zr-0.5;op.p.la=3}
@@ -1191,13 +1191,13 @@ var cht=tools.filter(function(t){return t.type==='chamfer'})[0]||tools.filter(fu
 var addCh=function(gs,side,c,rev){if(!c)return;if(!cht){needCh=true;return}chOps.push(mk('chamfer',cht,function(o){o.gs=gs;o.p.z0=0;o.p.c=c;o.p.ex=0.3;o.o={side:side,climb:1,rev:rev?1:0}}))};
 if(MD.face!==0&&st&&st.zt>0.001){var ft=tools.filter(function(t){return t.type==='face'})[0]||mills[0];if(ft)ops.push(mk('face',ft,function(o){o.p.x0=st.x0;o.p.x1=st.x1;o.p.y0=st.y0;o.p.y1=st.y1;o.p.z0=st.zt;o.p.z1=0}))}
 var pk={},dfin=[];F.forEach(function(f){if(f.role==='pocket'){var d=Math.min(f.d,H),k=nf(d)+'|'+nf(f.dr);(pk[k]=pk[k]||{d:d,dr:f.dr,gs:[]});f.chs.forEach(function(c){pk[k].gs.push(c)});addCh(f.chs,'in',f.ch)}});
-Object.keys(pk).forEach(function(k){var g=pk[k],al=0.3+(g.dr?g.d*TA(g.dr):0),op=tryM('pocket',g.gs,function(o){o.p.z0=0;o.p.z1=-g.d;o.p.alw=+al.toFixed(3)});if(op){ops.push(op);if(g.dr){var fo=mk('contour',UIX.tget(op.tool),function(o){o.gs=g.gs;o.p.z0=0;o.p.z1=-g.d;o.p.alw=0;o.p.dr=g.dr;o.p.dz=0.25;o.o={side:'in',climb:1,comp:0,ent:'sd',fin:0,rev:0,pre:1}});dfin.push(fo)}}
+Object.keys(pk).forEach(function(k){var g=pk[k],al=g.dr?0.3+g.d*TA(g.dr):0,op=tryM('pocket',g.gs,function(o){o.p.z0=0;o.p.z1=-g.d;o.p.alw=+al.toFixed(3)});if(op){ops.push(op);if(g.dr){var fo=mk('contour',UIX.tget(op.tool),function(o){o.gs=g.gs;o.p.z0=0;o.p.z1=-g.d;o.p.alw=0;o.p.dr=g.dr;o.p.dz=0.25;o.o={side:'in',climb:1,comp:0,ent:'sd',fin:0,rev:0,pre:1}});dfin.push(fo)}}
 else g.gs.forEach(function(c){var o1=tryM('pocket',[c],function(o){o.p.z0=0;o.p.z1=-g.d;o.p.alw=+al.toFixed(3)});if(o1)ops.push(o1);else msg.push('нет фрезы для кармана '+chName(c))})});
 ops=ops.concat(dfin);
 var drills=[],cpts=[],cdeep=[],thr=[],ctr=tools.filter(function(t){return t.type==='center'})[0];
 F.forEach(function(f){if(f.role!=='hole')return;var dep=f.through?H:Math.min(f.d,H),dr=tools.filter(function(t){return t.type==='drill'&&Math.abs(t.d-f.D)<=0.05})[0];
 if(dr){var pts=f.chs.map(function(c){return c.c}),z1d=+(-(f.through?H+0.3*dr.d+1:dep)).toFixed(3),dk=dr.n+'|'+z1d;if(f.ch){if(ctr){var ck=nf(f.D/2+f.ch),cg=cdeep.filter(function(x){return x.k===ck})[0];if(cg)cg.pts=cg.pts.concat(pts);else cdeep.push({k:ck,pts:pts,z:-(f.D/2+f.ch)})}else{cpts=cpts.concat(pts);addCh(f.chs,'in',f.ch)}}else cpts=cpts.concat(pts);var ex_=drills.filter(function(o){return o._k===dk})[0];if(ex_){ex_.g.pts=ex_.g.pts.concat(pts);ex_.g.label='Ø'+nf(f.D)}else{var dop=mk('holes',dr,function(o){o.o.src='draw';o.g={src:'draw',pts:pts,label:'Ø'+nf(f.D)};o.p.z0=0;o.p.z1=z1d;o.o.cyc=(-o.p.z1>3*dr.d)?'83':'81'});dop._k=dk;drills.push(dop)}}
-else{var op=tryM('pocket',f.chs,function(o){o.p.z0=0;o.p.z1=-(f.through?H+0.5:dep);o.p.alw=0.2});if(op){ops.push(op);addCh(f.chs,'in',f.ch)}else msg.push('нет сверла Ø'+nf(f.D)+' и фрезы меньше Ø'+nf(f.D))}});
+else{var op=tryM('pocket',f.chs,function(o){o.p.z0=0;o.p.z1=-(f.through?H+0.5:dep);o.p.alw=0});if(op){ops.push(op);addCh(f.chs,'in',f.ch)}else msg.push('нет сверла Ø'+nf(f.D)+' и фрезы меньше Ø'+nf(f.D))}});
 F.forEach(function(f){if(f.role!=='thread')return;var P=f.p||1.5,dep=f.through?H:Math.min(f.d,H),mr=f.D/2-0.5413*P;
 var pre=f.chs.map(function(c){return {closed:1,circ:1,r:mr,c:c.c,els:[{t:'a',c:c.c,r:mr,p0:[c.c[0]+mr,c.c[1]],p1:[c.c[0]+mr,c.c[1]],cw:false,full:1}]}});
 var op=tryM('pocket',pre,function(o){o.p.z0=0;o.p.z1=-(f.through?H+0.5:Math.min(H,dep+Math.max(1,2*P)));o.p.alw=0});if(op)ops.push(op);else msg.push('нет фрезы под отверстие M'+nf(f.D));
@@ -1206,7 +1206,7 @@ var th=tools.filter(function(t){return t.type==='thread'&&t.d<2*mr*0.85}).sort(f
 if(th.length)thr.push(mk('thread',th[0],function(o){o.gs=f.chs;o.p.z0=0;o.p.z1=-dep;o.p.tp=P;o.o={tk:'in',hand:'R',tdir:'up',spr:1,thru:1}}));else msg.push('нет резьбофрезы для M'+nf(f.D))});
 var part=F.filter(function(f){return f.role==='part'})[0];
 if(part){var pc=part.chs[0];addCh([pc],'out',part.ch);
-if(part.mode==='all'){var al=0.3+(part.dr?H*TA(part.dr):0),cop=null;for(var i=0;i<mills.length&&!cop;i++){var o2=mk('contour',mills[i],function(o){o.gs=[pc];o.p.z0=0;o.p.z1=-H;o.p.alw=+al.toFixed(3);o.o={side:'out',climb:1,comp:0,ent:'sp',fin:part.dr?0:1,rev:0}});if(!genOp(o2,mills[i]).err)cop=o2}
+if(part.mode==='all'){var al=part.dr?0.3+H*TA(part.dr):0,cop=null;for(var i=0;i<mills.length&&!cop;i++){var o2=mk('contour',mills[i],function(o){o.gs=[pc];o.p.z0=0;o.p.z1=-H;o.p.alw=+al.toFixed(3);o.o={side:'out',climb:1,comp:0,ent:'sp',fin:part.dr?0:1,rev:0}});if(!genOp(o2,mills[i]).err)cop=o2}
 if(cop){ops.push(cop);if(part.dr)ops.push(mk('contour',UIX.tget(cop.tool),function(o){o.gs=[pc];o.p.z0=0;o.p.z1=-H;o.p.alw=0;o.p.dr=part.dr;o.p.dz=0.25;o.o={side:'out',climb:1,comp:0,ent:'sd',fin:0,rev:0}}))}else msg.push('контур детали: нет подходящей фрезы')}}
 else msg.push('не назначен контур детали');
 /* single walls and edge chamfers */
