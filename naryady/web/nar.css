@@ -113,3 +113,45 @@ body.nar main{display:block;max-width:1200px;margin:0 auto}
 #nSheet>*{min-width:0}
 .drow{min-width:0;box-sizing:border-box}
 .drow .nq span{min-width:32px}
+/* ---------- motion ---------- */
+@keyframes nUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes nDown{from{transform:none}to{transform:translateY(100%)}}
+@keyframes nFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes nFadeOut{from{opacity:1}to{opacity:0}}
+#nSheet{animation:nUp .34s cubic-bezier(.2,.9,.25,1)}
+#nSheet.re{animation:none}
+#nSheetBg{animation:nFadeIn .25s ease}
+#nSheet.shOut{pointer-events:none;animation:nDown .22s cubic-bezier(.5,0,.8,.4) forwards}
+#nSheetBg.shOut{pointer-events:none;animation:nFadeOut .22s ease forwards}
+body.nar button{transition:transform .12s ease,background-color .2s ease,color .2s ease,border-color .2s ease}
+body.nar button:active:not(:disabled){transform:scale(.94)}
+.nr,.drow{transition:border-color .25s ease,background-color .25s ease,transform .12s ease}
+.nr:active{transform:scale(.985)}
+.nhero{background-size:200% 200%;animation:nGlow 9s ease-in-out infinite}
+@keyframes nGlow{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.nhero{background-image:linear-gradient(135deg,#1D9E75,#137258,#1FA77E,#137258)}
+.seg button.on{transition:background-color .25s ease,color .25s ease,box-shadow .25s ease}
+.drow.fr{border-style:dashed}
+.drow .tk{flex:none;height:32px;padding:0 10px;font-size:13px;border-radius:8px;white-space:nowrap}
+/* launch */
+#splash{position:fixed;inset:0;z-index:200;background:#171B1F;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .45s ease,transform .45s ease}
+#splash.out{opacity:0;transform:scale(1.06);pointer-events:none;animation:none!important}
+#splash svg{width:120px;height:120px;border-radius:28px;box-shadow:0 14px 40px rgba(0,0,0,.45);animation:spIn .6s cubic-bezier(.2,.9,.3,1.3) both}
+#splash .sp-doc{animation:spDoc .55s .1s cubic-bezier(.2,.9,.3,1.2) both;transform-origin:50px 51px}
+#splash .sp-l{stroke-dasharray:26;stroke-dashoffset:26;animation:spLine .35s ease forwards}
+#splash .sp-l1{animation-delay:.35s}#splash .sp-l2{animation-delay:.47s}#splash .sp-l3{animation-delay:.59s}
+#splash .sp-coin{transform-origin:68px 72px;animation:spCoin .5s .7s cubic-bezier(.3,1.7,.5,1) both}
+#splash b{color:#E8ECEF;font:600 22px/1 system-ui,sans-serif;letter-spacing:.5px;animation:spTxt .5s .55s ease both}
+#splash i{display:block;width:90px;height:3px;border-radius:2px;background:rgba(255,255,255,.12);overflow:hidden;animation:spTxt .4s .6s ease both}
+#splash i::after{content:"";display:block;height:100%;width:40%;background:#1D9E75;border-radius:2px;animation:spBar .9s .6s ease-in-out infinite}
+@keyframes spIn{from{opacity:0;transform:scale(.6) rotate(-8deg)}to{opacity:1;transform:none}}
+@keyframes spDoc{from{opacity:0;transform:translateY(14px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes spLine{to{stroke-dashoffset:0}}
+@keyframes spCoin{from{opacity:0;transform:scale(0) rotate(-120deg)}to{opacity:1;transform:none}}
+@keyframes spTxt{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes spBar{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
+body.nar.enter .mrow,body.nar.enter .nhero,body.nar.enter .ngr>div,body.nar.enter #nSend,body.nar.enter .nright>*{animation:spTxt .45s cubic-bezier(.2,.8,.2,1) both}
+body.nar.enter .nhero{animation:spTxt .45s .05s cubic-bezier(.2,.8,.2,1) both,nGlow 9s ease-in-out infinite}
+body.nar.enter .ngr>div:nth-child(1){animation-delay:.1s}body.nar.enter .ngr>div:nth-child(2){animation-delay:.14s}body.nar.enter .ngr>div:nth-child(3){animation-delay:.18s}body.nar.enter .ngr>div:nth-child(4){animation-delay:.22s}body.nar.enter .ngr>div:nth-child(5){animation-delay:.26s}body.nar.enter #nSend{animation-delay:.3s}body.nar.enter .nright>*{animation-delay:.2s}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}#splash{display:none}}
+body.boot main{visibility:hidden}
