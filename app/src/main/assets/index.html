@@ -161,7 +161,32 @@ button:not(.p):not(.on):hover,label.b:hover{border-color:var(--mut)}
 #lbList{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));column-gap:12px}
 #lbList>:not(.opc){grid-column:1/-1}
 }
-</style><!--SIM:css--><style>#sim{position:absolute;inset:0;width:100%;height:100%;border-radius:8px;touch-action:none;display:block}#sim[hidden]{display:none}#vs.on,#sPlay.on{background:#1D9E75;color:#fff;border-color:#1D9E75}</style><!--/SIM:css--></head><body><main>
+</style><!--SIM:css--><style>#sim{position:absolute;inset:0;width:100%;height:100%;border-radius:8px;touch-action:none;display:block}#sim[hidden]{display:none}#vs.on,#sPlay.on{background:#1D9E75;color:#fff;border-color:#1D9E75}</style><!--/SIM:css--><!--FX:css--><style>#splash{position:fixed;inset:0;z-index:300;background:#171B1F;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .45s ease,transform .45s ease}
+#splash.out{opacity:0;transform:scale(1.06);pointer-events:none}
+#splash svg{width:124px;height:124px;border-radius:28px;box-shadow:0 14px 40px rgba(0,0,0,.45);animation:fxIn .55s cubic-bezier(.2,.9,.3,1.3) both}
+#splash .blk{animation:fxRise .5s .15s cubic-bezier(.2,.9,.3,1.2) both;transform-origin:54px 54px}
+#splash .pth{stroke-dasharray:150;stroke-dashoffset:150;animation:fxDraw .9s .35s cubic-bezier(.45,0,.3,1) forwards}
+#splash .mill{offset-path:path('M27 80 V35 Q27 29 33 29 H75 Q81 29 81 35 V73 Q81 79 75 79 H50');offset-rotate:0deg;offset-distance:0%;animation:fxMove .9s .35s cubic-bezier(.45,0,.3,1) both,fxPop .3s .25s cubic-bezier(.3,1.7,.5,1) both}
+#splash .flt{transform-box:fill-box;transform-origin:center;animation:fxSpin .35s linear infinite}
+#splash b{color:#E8ECEF;font:600 22px/1 system-ui,sans-serif;letter-spacing:.4px;animation:fxUp .5s .55s ease both}
+#splash small{color:#8C949B;font:13px/1 system-ui,sans-serif;animation:fxUp .5s .7s ease both}
+@keyframes fxIn{from{opacity:0;transform:scale(.6) rotate(-8deg)}to{opacity:1;transform:none}}
+@keyframes fxRise{from{opacity:0;transform:translateY(10px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes fxDraw{to{stroke-dashoffset:0}}
+@keyframes fxMove{from{offset-distance:0%}to{offset-distance:100%}}
+@keyframes fxPop{from{opacity:0}to{opacity:1}}
+@keyframes fxSpin{to{transform:rotate(360deg)}}
+@keyframes fxUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+body.boot main{visibility:hidden}
+body.enter .tabs .tb{animation:fxUp .4s cubic-bezier(.2,.8,.2,1) both}
+body.enter .tabs .tb:nth-child(2){animation-delay:.04s}body.enter .tabs .tb:nth-child(3){animation-delay:.08s}body.enter .tabs .tb:nth-child(4){animation-delay:.12s}body.enter .tabs .tb:nth-child(5){animation-delay:.16s}
+button,.tb,label.b{transition:transform .12s ease,background-color .2s ease,color .2s ease,border-color .2s ease,box-shadow .2s ease}
+button:active:not(:disabled),label.b:active{transform:scale(.95)}
+.tabs .tb.on{box-shadow:0 4px 14px rgba(29,158,117,.35)}
+.seg button.on{transition:background-color .25s ease,color .25s ease}
+details>summary~*{animation:fxUp .3s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}#splash{display:none}body.boot main{visibility:visible}}
+</style><!--/FX:css--></head><body class="boot"><!--FX:body--><div id="splash" aria-hidden="true"><svg viewBox="0 0 108 108"><defs><linearGradient id="fxbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A3036"/><stop offset="1" stop-color="#171B1F"/></linearGradient></defs><rect width="108" height="108" fill="url(#fxbg)"/><rect class="blk" x="36" y="38" width="36" height="32" rx="3" fill="#3A434B" stroke="#E8ECEF" stroke-width="3"/><path class="pth" d="M27 80 V35 Q27 29 33 29 H75 Q81 29 81 35 V73 Q81 79 75 79 H50" fill="none" stroke="#1D9E75" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" pathLength="150"/><g class="mill"><g transform="translate(-50 -79)"><circle cx="50" cy="79" r="8.5" fill="#D85A30" stroke="#171B1F" stroke-width="1.5"/><path class="flt" d="M50.00 76.40 Q50.84 73.46 55.95 74.28 M52.25 80.30 Q54.38 82.49 51.11 86.52 M47.75 80.30 Q44.79 81.04 42.93 76.21" fill="none" stroke="#FFFFFF" stroke-width="1.7" stroke-linecap="round"/><circle cx="50" cy="79" r="1.6" fill="#FFFFFF"/></g></g></svg><b>G-код ЧПУ</b><small>Fanuc 0i-MF</small></div><!--/FX:body--><main>
 <nav class="tabs"><button class="tb on" id="tb1" data-i="path">Траектория</button><button class="tb" id="tb2" data-i="pencil">Чертёж</button><button class="tb" id="tb3" data-i="list">Операции</button><button class="tb" id="tb4" data-i="tool">Инструмент</button><button class="tb" id="tb5" data-i="file">Файлы</button></nav>
 <section id="t1">
 <textarea id="src" spellcheck="false" style="height:110px" placeholder="Вставьте G-код сюда или нажмите «Файл»"></textarea>
@@ -1510,4 +1535,20 @@ if(sb){sb.onclick=function(){var c=mult||autoMult(),k=SP.indexOf(c);mult=SP[(k+1
 var _run2=run;window.run=run=function(s){if(play)stopP();_run2(s);if(!mult)showSpd()};
 window.SIM={grid:function(){return G},on:function(){return on},setOn:setOn};
 })();
-</script><!--/SIM:js--></body></html>
+</script><!--/SIM:js--><!--FX:js--><script>(function(){var RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches,B=document.body,sp=document.getElementById('splash');
+if(sp){if(RM){sp.remove();B.classList.remove('boot')}else setTimeout(function(){sp.classList.add('out');B.classList.remove('boot');B.classList.add('enter');setTimeout(function(){sp.remove()},500);setTimeout(function(){B.classList.remove('enter')},900)},1450)}else B.classList.remove('boot');
+if(RM||!Element.prototype.animate)return;
+var E='cubic-bezier(.2,.8,.2,1)',an=function(el,kf,o){try{el.animate(kf,o)}catch(e){}};
+var stag=function(list,d,max){[].slice.call(list,0,max||10).forEach(function(c,i){if(c.offsetParent===null&&c.tagName!=='DETAILS')return;an(c,[{opacity:0,transform:'translateY('+(d||12)+'px)'},{opacity:1,transform:'none'}],{duration:340,delay:i*35,easing:E,fill:'backwards'})})};
+var cur=1;for(var k=1;k<=5;k++){var s=document.getElementById('t'+k);if(s&&!s.hidden)cur=k}
+var mo=new MutationObserver(function(ms){ms.forEach(function(m){var t=m.target;if(m.attributeName!=='hidden'||t.hidden)return;
+var n=+(t.id||'').replace('t','');if(/^t[1-5]$/.test(t.id)){var dir=n>cur?1:-1;cur=n;an(t,[{opacity:0,transform:'translateX('+(dir*18)+'px)'},{opacity:1,transform:'none'}],{duration:280,easing:E});stag(t.children,10,8)}
+else if(t.id==='opEd'){an(t,[{opacity:0,transform:'translateX(24px)'},{opacity:1,transform:'none'}],{duration:300,easing:E});stag(t.children,10,8)}
+else if(t.id==='opView'){an(t,[{opacity:0,transform:'translateX(-24px)'},{opacity:1,transform:'none'}],{duration:300,easing:E})}})});
+['t1','t2','t3','t4','t5','opEd','opView'].forEach(function(id){var e=document.getElementById(id);if(e)mo.observe(e,{attributes:true,attributeFilter:['hidden']})});
+var ol=document.getElementById('opList'),last=ol?ol.children.length:0;
+if(ol)new MutationObserver(function(){var n=ol.children.length;if(n>last&&last>=0){var c=ol.children[n-1];if(c)an(c,[{opacity:0,transform:'scale(.92)'},{opacity:1,transform:'none'}],{duration:380,easing:'cubic-bezier(.3,1.5,.5,1)'})}last=n}).observe(ol,{childList:true});
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.tabs .tb');if(!b)return;var r=b.getBoundingClientRect(),dot=document.createElement('span');dot.style.cssText='position:fixed;left:'+(e.clientX-4)+'px;top:'+(e.clientY-4)+'px;width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.55);pointer-events:none;z-index:400';document.body.appendChild(dot);an(dot,[{transform:'scale(1)',opacity:.8},{transform:'scale('+(Math.max(r.width,r.height)/3)+')',opacity:0}],{duration:420,easing:'ease-out'});setTimeout(function(){dot.remove()},430)},true);
+var go=document.getElementById('go');if(go)go.addEventListener('click',function(){var c=document.getElementById('cv');if(c&&c.offsetParent)an(c,[{opacity:.3,transform:'scale(.98)'},{opacity:1,transform:'none'}],{duration:350,easing:E})});
+})();
+</script><!--/FX:js--></body></html>
