@@ -155,7 +155,6 @@ body.nar.enter .nhero{animation:spTxt .45s .05s cubic-bezier(.2,.8,.2,1) both,nG
 body.nar.enter .ngr>div:nth-child(1){animation-delay:.1s}body.nar.enter .ngr>div:nth-child(2){animation-delay:.14s}body.nar.enter .ngr>div:nth-child(3){animation-delay:.18s}body.nar.enter .ngr>div:nth-child(4){animation-delay:.22s}body.nar.enter .ngr>div:nth-child(5){animation-delay:.26s}body.nar.enter #nSend{animation-delay:.3s}body.nar.enter .nright>*{animation-delay:.2s}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}#splash{display:none}}
 body.boot main{visibility:hidden}
-.nr .fv{flex:none;width:28px;height:28px;margin:0 -4px 0 -6px;padding:0;border:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.nr .fv svg{width:18px;height:18px;fill:none;stroke:var(--mut);stroke-width:1.6;stroke-linejoin:round;opacity:.55}
-.nr.fav .fv svg{fill:#E8A33A;stroke:#E8A33A;opacity:1}
-.nr.fav{border-color:rgba(232,163,58,.45)}
+.nr .fv{flex:none;width:24px;height:28px;margin:0 -6px 0 -8px;padding:0;border:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.nr .fv svg{width:13px;height:13px;fill:none;stroke:var(--mut);stroke-width:1.5;stroke-linejoin:round;opacity:.28}
+.nr.fav .fv svg{fill:#C9A050;stroke:#C9A050;opacity:.75}
