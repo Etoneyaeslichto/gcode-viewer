@@ -158,3 +158,10 @@ body.boot main{visibility:hidden}
 .nr .fv{flex:none;width:24px;height:28px;margin:0 -6px 0 -8px;padding:0;border:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .nr .fv svg{width:13px;height:13px;fill:none;stroke:var(--mut);stroke-width:1.5;stroke-linejoin:round;opacity:.28}
 .nr.fav .fv svg{fill:#C9A050;stroke:#C9A050;opacity:.75}
+.fvb{display:flex;align-items:center;gap:8px;height:36px;font-size:13px;color:var(--mut);background:transparent;border:1px dashed var(--bd);border-radius:10px;padding:0 12px;justify-content:center}
+.fvb svg,.fvbar svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
+.fvbar{display:flex;align-items:center;gap:6px;min-width:0}
+.fvbar span{flex:1;min-width:0;display:flex;align-items:center;gap:6px;font-size:13px;color:#C9A050;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fvbar span svg{fill:#C9A050;stroke:#C9A050}
+.fvbar button{flex:none;width:40px;height:34px;padding:0;font-size:16px}
+.fvbar button:disabled{opacity:.35}
